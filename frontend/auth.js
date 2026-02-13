@@ -629,7 +629,8 @@ function loadUserProfile(user) {
   const verificationStatus = document.getElementById('verificationStatus');
   if (verificationStatus) {
     const isVerified = user.is_verified || user.verified;
-    verificationStatus.textContent = isVerified ? 'Verified ✓' : 'Pending Admin Approval';
+    verificationStatus.textContent = isVerified ? 'Approved ✓' : 'Pending Admin Approval';
+    verificationStatus.className = 'detail-value ' + (isVerified ? 'verified' : 'pending');
   }
 
   // Add role-specific details

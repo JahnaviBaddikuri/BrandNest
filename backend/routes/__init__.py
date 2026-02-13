@@ -5,6 +5,7 @@ from .brands import brands_bp
 from .campaigns import campaigns_bp
 from .applications import applications_bp
 from .auth import auth_bp
+from .admin import admin_bp
 
 
 def register_routes(app):
@@ -14,3 +15,4 @@ def register_routes(app):
     app.register_blueprint(brands_bp)
     app.register_blueprint(campaigns_bp)
     app.register_blueprint(applications_bp)
+    app.register_blueprint(admin_bp)

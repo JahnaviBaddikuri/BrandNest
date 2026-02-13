@@ -55,11 +55,14 @@ function buildCreatorCard(item) {
   const card = document.createElement("div");
   card.className = "creator-card";
   const imageStyle = item.image ? `style="background-image:url('${item.image}')"` : "";
+  const verifiedBadge = item.verified ? `<div class="creator-card__verified">✓ Verified</div>` : '';
+  
   card.innerHTML = `
     <div class="creator-card__img" ${imageStyle}></div>
     <div class="creator-card__body">
       <div class="creator-card__tag">${item.platform} • ${item.followers}</div>
       <div class="creator-card__name">${item.name}</div>
+      ${verifiedBadge}
       <div class="creator-card__meta">${item.price} • ${item.location}</div>
       <div class="creator-card__meta">Rating ${item.rating}</div>
     </div>
@@ -81,6 +84,7 @@ function toCardData(creator) {
     price: formatPrice(creator.rate),
     location: creator.location || "Remote",
     image: creator.profile_image_url || "",
+    verified: creator.is_verified || false,
   };
 }
 

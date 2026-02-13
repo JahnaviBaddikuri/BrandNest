@@ -217,17 +217,36 @@ function buildBrandCard(brand) {
 }
 
 // Load Pending Users
-function loadPendingUsers() {
+async function loadPendingUsers() {
   // Clear existing content
   creatorsList.innerHTML = '<div class="loading-spinner"></div>';
   brandsList.innerHTML = '<div class="loading-spinner"></div>';
 
-  // TODO: Replace with actual API call in Phase 2
-  // For now, use mock data
-  setTimeout(() => {
-    renderCreators(mockPendingCreators);
-    renderBrands(mockPendingBrands);
-  }, 500);
+  try {
+    // Fetch pending users from backend
+    const response = await fetch(`${API_BASE}/admin/pending-users`);
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to load pending users');
+    }
+    
+    // Render the data
+    renderCreators(result.data.creators || []);
+    renderBrands(result.data.brands || []);
+    
+  } catch (error) {
+    console.error('Error loading pending users:', error);
+    
+    // Show error message and fallback to mock data for testing
+    creatorsList.innerHTML = '<div style="text-align:center;padding:20px;color:#b42318;">Failed to load data. Using mock data.</div>';
+    brandsList.innerHTML = '<div style="text-align:center;padding:20px;color:#b42318;">Failed to load data. Using mock data.</div>';
+    
+    setTimeout(() => {
+      renderCreators(mockPendingCreators);
+      renderBrands(mockPendingBrands);
+    }, 1000);
+  }
 }
 
 function renderCreators(creators) {
@@ -268,14 +287,17 @@ async function approveUser(userType, userId) {
   approveBtn.textContent = "Approving...";
 
   try {
-    // TODO: Replace with actual API call in Phase 2
-    // const response = await fetch(`${API_BASE}/admin/approve/${userType}/${userId}`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' }
-    // });
+    // Call backend API to approve user
+    const response = await fetch(`${API_BASE}/admin/approve/${userType}/${userId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to approve user');
+    }
     
     // Show success message
     showSuccessMessage(`${userType === 'creator' ? 'Creator' : 'Brand'} approved successfully!`);
@@ -294,7 +316,7 @@ async function approveUser(userType, userId) {
     console.error('Error approving user:', error);
     approveBtn.disabled = false;
     approveBtn.textContent = "Approve";
-    alert('Failed to approve user. Please try again.');
+    alert(`Failed to approve user: ${error.message}`);
   }
 }
 

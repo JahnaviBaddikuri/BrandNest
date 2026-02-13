@@ -196,6 +196,16 @@
   font-weight: 500;
 }
 
+.detail-value.verified {
+  color: #039855;
+  font-weight: 600;
+}
+
+.detail-value.pending {
+  color: #f79009;
+  font-weight: 500;
+}
+
 /* Action Buttons */
 .action-buttons {
   display: flex;
