@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Collabstr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <div class="nav__logo">collabstr admin</div>
+      <nav class="nav__links">
+        <a href="#pending-creators">Pending Creators</a>
+        <a href="#pending-brands">Pending Brands</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="btn btn--ghost" id="refreshBtn">Refresh</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-container">
+    <div class="admin-header">
+      <h1>Admin Dashboard</h1>
+    </div>
+
+    <!-- Pending Creators Section -->
+    <section class="admin-section" id="pending-creators">
+      <div class="section-header">
+        <h2>Pending Creator Accounts</h2>
+        <span class="count-badge" id="creatorCount">0</span>
+      </div>
+      <div class="pending-list" id="creatorsList">
+        <!-- Creator cards will be inserted here -->
+      </div>
+    </section>
+
+    <!-- Pending Brands Section -->
+    <section class="admin-section" id="pending-brands">
+      <div class="section-header">
+        <h2>Pending Brand Accounts</h2>
+        <span class="count-badge" id="brandCount">0</span>
+      </div>
+      <div class="pending-list" id="brandsList">
+        <!-- Brand cards will be inserted here -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer__brand">collabstr admin portal</div>
+    <p class="footer__copy">Unauthorized access is prohibited</p>
+  </footer>
+
+  <script src="admin.js"></script>
+</body>
+</html>
