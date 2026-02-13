@@ -10,15 +10,15 @@ const featuredFallback = [
 
 const grids = {
   featured: document.getElementById("featuredGrid"),
+  brands: document.getElementById("brandsGrid"),
 };
 
 const platformSelect = document.getElementById("platformSelect");
 const categorySelect = document.getElementById("categorySelect");
 const searchBtn = document.getElementById("searchBtn");
 
-
-
 let creatorsCache = [];
+let brandsCache = [];
 
 function setStatus(message, isError = false) {
   if (!apiStatusEl) {
@@ -55,7 +55,7 @@ function buildCreatorCard(item) {
   const card = document.createElement("div");
   card.className = "creator-card";
   const imageStyle = item.image ? `style="background-image:url('${item.image}')"` : "";
-  const verifiedBadge = item.verified ? `<div class="creator-card__verified">✓ Verified</div>` : '';
+  const verifiedBadge = item.verified ? `<div class="creator-card__verified">Verified</div>` : '';
   
   card.innerHTML = `
     <div class="creator-card__img" ${imageStyle}></div>
@@ -70,9 +70,39 @@ function buildCreatorCard(item) {
   return card;
 }
 
+function buildBrandCard(brand) {
+  const card = document.createElement("div");
+  card.className = "brand-card";
+  const logoStyle = brand.logo ? `style="background-image:url('${brand.logo}')"` : "";
+  const verifiedBadge = brand.verified ? `<div class="brand-card__verified">Verified</div>` : '';
+  
+  card.innerHTML = `
+    <div class="brand-card__logo" ${logoStyle}>
+      ${!brand.logo ? `<span class="brand-card__initials">${brand.initials}</span>` : ''}
+    </div>
+    <div class="brand-card__body">
+      <div class="brand-card__industry">${brand.industry}</div>
+      <div class="brand-card__name">${brand.name}</div>
+      ${verifiedBadge}
+      <div class="brand-card__location">${brand.location}</div>
+      <div class="brand-card__website">
+        <a href="${brand.website}" target="_blank" rel="noopener noreferrer">
+          ${brand.websiteDisplay}
+        </a>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
 function fillGrid(grid, items) {
   grid.innerHTML = "";
   items.forEach((item) => grid.appendChild(buildCreatorCard(item)));
+}
+
+function fillBrandsGrid(grid, items) {
+  grid.innerHTML = "";
+  items.forEach((item) => grid.appendChild(buildBrandCard(item)));
 }
 
 function toCardData(creator) {
@@ -85,6 +115,33 @@ function toCardData(creator) {
     location: creator.location || "Remote",
     image: creator.profile_image_url || "",
     verified: creator.is_verified || false,
+  };
+}
+
+function toBrandCardData(brand) {
+  const getInitials = (name) => {
+    return name
+      .split(/[\s]+/)
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const formatWebsite = (url) => {
+    if (!url) return '';
+    return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+  };
+
+  return {
+    name: brand.company_name || "Brand",
+    industry: brand.industry || "Business",
+    location: brand.location || "Remote",
+    website: brand.website || "#",
+    websiteDisplay: formatWebsite(brand.website),
+    logo: brand.logo_url || "",
+    initials: getInitials(brand.company_name || "Brand"),
+    verified: brand.verified || false,
   };
 }
 
@@ -101,6 +158,18 @@ async function fetchCreators(params = {}) {
   return data.data || [];
 }
 
+async function fetchBrands(params = {}) {
+  const query = new URLSearchParams();
+  if (params.industry) query.append("industry", params.industry);
+  const url = `${API_BASE}/brands${query.toString() ? `?${query}` : ""}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to load brands");
+  }
+  return data.data || [];
+}
+
 async function loadCreators() {
   try {
     creatorsCache = await fetchCreators();
@@ -112,9 +181,24 @@ async function loadCreators() {
   }
 }
 
+async function loadBrands() {
+  try {
+    brandsCache = await fetchBrands();
+    renderBrands(brandsCache);
+  } catch (error) {
+    console.error("Failed to load brands:", error);
+    // Silently fail for brands, don't show error
+  }
+}
+
 function renderCreators(creators) {
   const cards = creators.map(toCardData);
   fillGrid(grids.featured, cards.slice(0, 8));
+}
+
+function renderBrands(brands) {
+  const cards = brands.map(toBrandCardData);
+  fillBrandsGrid(grids.brands, cards.slice(0, 8));
 }
 
 function renderFallback() {
@@ -142,3 +226,4 @@ searchBtn.addEventListener("click", async () => {
 });
 
 loadCreators();
+loadBrands();
