@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join as Creator - Collabstr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <div class="nav__logo"><a href="index.html">collabstr</a></div>
+      <nav class="nav__links">
+        <a href="index.html#marketplace">Search</a>
+        <a href="index.html#how">How It Works</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#case-studies">Case Studies</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="btn btn--ghost" onclick="window.location.href='login.html'">Login</button>
+        <button class="btn" onclick="window.location.href='join-brand.html'">Join as Brand</button>
+        <button class="btn btn--dark" onclick="window.location.href='join-creator.html'">Join as Creator</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-container">
+    <div class="auth-card auth-card--wide">
+      <div class="auth-card__header">
+        <h1>Join as Creator</h1>
+        <p>Start your influencer journey on Collabstr</p>
+      </div>
+
+      <form class="auth-form" id="creatorForm">
+        <!-- Account Information -->
+        <fieldset class="form-fieldset">
+          <legend>Account Information</legend>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="creatorEmail">Email Address *</label>
+              <input 
+                id="creatorEmail" 
+                name="email" 
+                type="email" 
+                placeholder="your@email.com" 
+                required 
+              />
+              <span class="error-message" id="emailError"></span>
+            </div>
+            <div class="form-group">
+              <label for="creatorPassword">Password *</label>
+              <input 
+                id="creatorPassword" 
+                name="password" 
+                type="password" 
+                placeholder="Create a password" 
+                required 
+              />
+              <span class="error-message" id="passwordError"></span>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Personal Information -->
+        <fieldset class="form-fieldset">
+          <legend>Personal Information</legend>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="username">Username *</label>
+              <input 
+                id="username" 
+                name="username" 
+                type="text" 
+                placeholder="Your username" 
+                required 
+              />
+              <span class="error-message" id="usernameError"></span>
+            </div>
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input 
+                id="location" 
+                name="location" 
+                type="text" 
+                placeholder="City, Country" 
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea 
+              id="bio" 
+              name="bio" 
+              placeholder="Tell us about yourself..." 
+              rows="4"
+            ></textarea>
+          </div>
+        </fieldset>
+
+        <!-- Social Media Information -->
+        <fieldset class="form-fieldset">
+          <legend>Social Media Information</legend>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="platform">Platform *</label>
+              <select id="platform" name="platform" required>
+                <option value="">Select a platform</option>
+                <option value="instagram">Instagram</option>
+                <option value="tiktok">TikTok</option>
+                <option value="youtube">YouTube</option>
+                <option value="ugc">UGC</option>
+              </select>
+              <span class="error-message" id="platformError"></span>
+            </div>
+            <div class="form-group">
+              <label for="category">Category *</label>
+              <select id="category" name="category" required>
+                <option value="">Select a category</option>
+                <option value="fashion">Fashion</option>
+                <option value="beauty">Beauty</option>
+                <option value="fitness">Fitness</option>
+                <option value="tech">Tech</option>
+                <option value="travel">Travel</option>
+                <option value="food">Food</option>
+                <option value="lifestyle">Lifestyle</option>
+              </select>
+              <span class="error-message" id="categoryError"></span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="followers">Followers Count</label>
+              <input 
+                id="followers" 
+                name="followers_count" 
+                type="number" 
+                placeholder="0" 
+                min="0"
+              />
+            </div>
+            <div class="form-group">
+              <label for="engagement">Engagement Rate (%)</label>
+              <input 
+                id="engagement" 
+                name="engagement_rate" 
+                type="number" 
+                placeholder="0.00" 
+                step="0.01" 
+                min="0"
+              />
+            </div>
+            <div class="form-group">
+              <label for="rate">Rate per Post ($) *</label>
+              <input 
+                id="rate" 
+                name="rate" 
+                type="number" 
+                placeholder="0.00" 
+                step="0.01" 
+                min="0" 
+                required 
+              />
+              <span class="error-message" id="rateError"></span>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Profile Media -->
+        <fieldset class="form-fieldset">
+          <legend>Profile Media</legend>
+          
+          <div class="form-group">
+            <label for="profileImage">Profile Image</label>
+            <input 
+              id="profileImage" 
+              name="profile_image" 
+              type="file" 
+              accept="image/*" 
+            />
+            <small>Upload a profile photo (JPG/PNG/WebP)</small>
+          </div>
+        </fieldset>
+
+        <!-- Verification -->
+        <fieldset class="form-fieldset">
+          <div class="form-group checkbox">
+            <input 
+              id="verified" 
+              name="is_verified" 
+              type="checkbox" 
+            />
+            <label for="verified">I have a verified badge on my social media profile</label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn btn--full">Create Creator Account</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+      </div>
+
+      <div class="auth-message" id="authMessage"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer__brand">collabstr</div>
+    <div class="footer__links"></div>
+    <p class="footer__copy">&copy; 2024 Collabstr. All rights reserved.</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

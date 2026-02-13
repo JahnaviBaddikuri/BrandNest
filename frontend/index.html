@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collabstr             </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <div class="nav__logo">collabstr</div>
+      <nav class="nav__links">
+        <a href="#marketplace">Search</a>
+        <a href="#how">How It Works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#case-studies">Case Studies</a>
+      </nav>
+      <div class="nav__actions">
+        <a href="login.html" class="btn btn--ghost">Login</a>
+        <a href="join-brand.html" class="btn">Join as Brand</a>
+        <a href="join-creator.html" class="btn btn--dark">Join as Creator</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="marketplace">
+      <div class="hero__content">
+        <h1>Influencer Marketing Made Easy</h1>
+        <p>Find and hire top Instagram, TikTok, YouTube, and UGC influencers to create unique content for your brand.</p>
+        <div class="search">
+          <div class="search__item">
+            <label>Platform</label>
+            <select id="platformSelect">
+              <option>Choose a platform</option>
+              <option>Instagram</option>
+              <option>TikTok</option>
+              <option>YouTube</option>
+              <option>UGC</option>
+            </select>
+          </div>
+          <div class="search__item">
+            <label>Category</label>
+            <select id="categorySelect">
+              <option>Choose a category</option>
+              <option>Fashion</option>
+              <option>Beauty</option>
+              <option>Fitness</option>
+              <option>Tech</option>
+            </select>
+          </div>
+          <button class="btn btn--search" id="searchBtn">Search</button>
+        </div>
+        
+        
+        <div class="hero__results">
+          <div class="section__header">
+            <div>
+              <p class="section__eyebrow">Featured</p>
+              <h2>Hire top influencers across all platforms</h2>
+            </div>
+          </div>
+          <div class="card-grid" id="featuredGrid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer__brand">collabstr</div>
+    <div class="footer__links">
+      
+    </div>
+    <p class="footer__copy"></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

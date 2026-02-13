@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <div class="nav__logo"><a href="index.html">collabstr</a></div>
+      <nav class="nav__links">
+        <a href="index.html#marketplace">Search</a>
+        <a href="index.html#how">How It Works</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#case-studies">Case Studies</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="btn btn--ghost" onclick="window.location.href='login.html'">Login</button>
+        <button class="btn" onclick="window.location.href='join-brand.html'">Join as Brand</button>
+        <button class="btn btn--dark" onclick="window.location.href='join-creator.html'">Join as Creator</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-container">
+    <div class="auth-card">
+      <div class="auth-card__header">
+        <h1>Login to Collabstr</h1>
+        <p>Welcome back! Please login to your account</p>
+      </div>
+
+      <form class="auth-form" id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input 
+            id="loginEmail" 
+            name="email" 
+            type="email" 
+            placeholder="Enter your email" 
+            required 
+          />
+          <span class="error-message" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input 
+            id="loginPassword" 
+            name="password" 
+            type="password" 
+            placeholder="Enter your password" 
+            required 
+          />
+          <span class="error-message" id="passwordError"></span>
+          <a href="#" id="forgotPasswordLink" style="font-size: 12px; color: #666; text-decoration: none; margin-top: 4px; display: block;">Forgot password?</a>
+        </div>
+
+        <div class="form-group">
+          <label for="userRole">I am a</label>
+          <select id="userRole" name="role" required>
+            <option value="">Select your role</option>
+            <option value="creator">Creator</option>
+            <option value="brand">Brand</option>
+          </select>
+          <span class="error-message" id="roleError"></span>
+        </div>
+
+        <button type="submit" class="btn btn--full">Login</button>
+      </form>
+
+      <div class="auth-divider">or</div>
+
+      <div class="auth-footer">
+        <p>Don't have an account?</p>
+        <div class="auth-links">
+          <a href="join-creator.html" class="btn btn--ghost btn--full">Join as Creator</a>
+          <a href="join-brand.html" class="btn btn--ghost btn--full">Join as Brand</a>
+        </div>
+      </div>
+
+      <div class="auth-message" id="authMessage"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer__brand">collabstr</div>
+    <div class="footer__links"></div>
+    <p class="footer__copy">&copy; 2024 Collabstr. All rights reserved.</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

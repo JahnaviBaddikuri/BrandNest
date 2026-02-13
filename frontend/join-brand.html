@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join as Brand - Collabstr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <div class="nav__logo"><a href="index.html">collabstr</a></div>
+      <nav class="nav__links">
+        <a href="index.html#marketplace">Search</a>
+        <a href="index.html#how">How It Works</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#case-studies">Case Studies</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="btn btn--ghost" onclick="window.location.href='login.html'">Login</button>
+        <button class="btn" onclick="window.location.href='join-brand.html'">Join as Brand</button>
+        <button class="btn btn--dark" onclick="window.location.href='join-creator.html'">Join as Creator</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-container">
+    <div class="auth-card auth-card--wide">
+      <div class="auth-card__header">
+        <h1>Join as Brand</h1>
+        <p>Connect with top influencers for your campaigns</p>
+      </div>
+
+      <form class="auth-form" id="brandForm">
+        <!-- Account Information -->
+        <fieldset class="form-fieldset">
+          <legend>Account Information</legend>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="brandEmail">Email Address *</label>
+              <input 
+                id="brandEmail" 
+                name="email" 
+                type="email" 
+                placeholder="your@company.com" 
+                required 
+              />
+              <span class="error-message" id="emailError"></span>
+            </div>
+            <div class="form-group">
+              <label for="brandPassword">Password *</label>
+              <input 
+                id="brandPassword" 
+                name="password" 
+                type="password" 
+                placeholder="Create a password" 
+                required 
+              />
+              <span class="error-message" id="passwordError"></span>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Company Information -->
+        <fieldset class="form-fieldset">
+          <legend>Company Information</legend>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="companyName">Company Name *</label>
+              <input 
+                id="companyName" 
+                name="company_name" 
+                type="text" 
+                placeholder="Your company name" 
+                required 
+              />
+              <span class="error-message" id="companyNameError"></span>
+            </div>
+            <div class="form-group">
+              <label for="industry">Industry *</label>
+              <select id="industry" name="industry" required>
+                <option value="">Select an industry</option>
+                <option value="fashion">Fashion</option>
+                <option value="beauty">Beauty</option>
+                <option value="fitness">Fitness</option>
+                <option value="technology">Technology</option>
+                <option value="travel">Travel</option>
+                <option value="food">Food</option>
+                <option value="lifestyle">Lifestyle</option>
+              </select>
+              <span class="error-message" id="industryError"></span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input 
+                id="location" 
+                name="location" 
+                type="text" 
+                placeholder="City, Country" 
+              />
+            </div>
+            <div class="form-group">
+              <label for="website">Website</label>
+              <input 
+                id="website" 
+                name="website" 
+                type="url" 
+                placeholder="https://yourcompany.com" 
+              />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Logo -->
+        <fieldset class="form-fieldset">
+          <legend>Brand Logo</legend>
+          
+          <div class="form-group">
+            <label for="logoUrl">Logo URL</label>
+            <input 
+              id="logoUrl" 
+              name="logo_url" 
+              type="url" 
+              placeholder="https://example.com/logo.png" 
+            />
+            <small>Provide a direct URL to your company logo</small>
+          </div>
+        </fieldset>
+
+        <!-- Verification -->
+        <fieldset class="form-fieldset">
+          <div class="form-group checkbox">
+            <input 
+              id="verified" 
+              name="verified" 
+              type="checkbox" 
+            />
+            <label for="verified">My brand is officially verified</label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn btn--full">Create Brand Account</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+      </div>
+
+      <div class="auth-message" id="authMessage"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer__brand">collabstr</div>
+    <div class="footer__links"></div>
+    <p class="footer__copy">&copy; 2024 Collabstr. All rights reserved.</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

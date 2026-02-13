@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Collabstr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <div class="nav__logo"><a href="index.html">collabstr</a></div>
+      <nav class="nav__links">
+        <a href="index.html#marketplace">Search</a>
+        <a href="index.html#how">How It Works</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#case-studies">Case Studies</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="btn btn--ghost" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <aside class="dashboard-sidebar">
+      <nav class="dashboard-nav">
+        <a href="#profile" class="dashboard-nav__link active" data-section="profile">
+          <span class="icon">👤</span>
+          <span>Profile</span>
+        </a>
+        <a href="#settings" class="dashboard-nav__link" data-section="settings">
+          <span class="icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+    </aside>
+
+    <section class="dashboard-content">
+      <!-- Profile Section -->
+      <div class="dashboard-section active" id="profile-section">
+        <div class="section-header">
+          <h1>Your Profile</h1>
+          <p>Manage your account information</p>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar"></div>
+            <div class="profile-info">
+              <h2 id="profileName">Loading...</h2>
+              <p id="profileRole" class="role-badge">Creator</p>
+              <p id="profileEmail">user@example.com</p>
+            </div>
+          </div>
+
+          <div class="profile-details">
+            <div class="detail-row">
+              <span class="detail-label">Account Type:</span>
+              <span class="detail-value" id="accountType">Creator</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Email:</span>
+              <span class="detail-value" id="accountEmail">user@example.com</span>
+            </div>
+            <div class="detail-row" id="verificationRow">
+              <span class="detail-label">Verification Status:</span>
+              <span class="detail-value" id="verificationStatus">Pending Approval</span>
+            </div>
+            <div class="detail-row" id="additionalDetails"></div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn" id="editProfileBtn">Edit Profile</button>
+          <button class="btn btn--ghost" id="deleteAccountBtn">Delete Account</button>
+        </div>
+      </div>
+
+      <!-- Settings Section -->
+      <div class="dashboard-section" id="settings-section">
+        <div class="section-header">
+          <h1>Settings</h1>
+          <p>Manage your preferences</p>
+        </div>
+
+        <div class="settings-card">
+          <div class="setting-item">
+            <div class="setting-header">
+              <h3>Password</h3>
+              <p>Change your account password</p>
+            </div>
+            <button class="btn btn--ghost" id="changePasswordBtn">Change Password</button>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-header">
+              <h3>Notifications</h3>
+              <p>Manage your notification preferences</p>
+            </div>
+            <div class="checkbox">
+              <input id="emailNotifications" name="emailNotifications" type="checkbox" checked />
+              <label for="emailNotifications">Email Notifications</label>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-header">
+              <h3>Privacy</h3>
+              <p>Control who can see your profile</p>
+            </div>
+            <div class="checkbox">
+              <input id="publicProfile" name="publicProfile" type="checkbox" checked />
+              <label for="publicProfile">Make Profile Public</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer__brand">collabstr</div>
+    <div class="footer__links"></div>
+    <p class="footer__copy">&copy; 2024 Collabstr. All rights reserved.</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
