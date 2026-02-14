@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from password_utils import hash_password, verify_password
 
 db = SQLAlchemy()
 
@@ -8,9 +9,9 @@ class Creator(db.Model):
     __tablename__ = 'creators'
 
     id = db.Column(db.Integer, primary_key=True)
-    firebase_uid = db.Column(db.String(128), unique=True, nullable=False, index=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
     platform = db.Column(db.String(50), nullable=False, default='instagram')
     followers_count = db.Column(db.Integer, default=0)
     engagement_rate = db.Column(db.Float, default=0.0)
@@ -25,10 +26,22 @@ class Creator(db.Model):
 
     applications = db.relationship('Application', backref='creator', lazy='dynamic', cascade='all, delete-orphan')
 
-    def to_dict(self):
-        return {
+    def set_password(self, password):
+        """Hash and set password"""
+        self.password_hash = hash_password(password)
+    
+    def check_password(self, password):
+        """Verify password against stored hash"""
+        return verify_password(self.password_hash, password)
+
+    def to_dict(self, include_sensitive=False):
+        """
+        Convert model to dictionary
+        Args:
+            include_sensitive: If True, includes password_hash (use with caution!)
+        """
+        data = {
             'id': self.id,
-            'firebase_uid': self.firebase_uid,
             'username': self.username,
             'email': self.email,
             'platform': self.platform,
@@ -43,6 +56,10 @@ class Creator(db.Model):
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
         }
+        # Never include password hash in normal responses
+        if include_sensitive:
+            data['password_hash'] = self.password_hash
+        return data
 
     def __repr__(self):
         return f'<Creator {self.username}>'
@@ -52,9 +69,9 @@ class Brand(db.Model):
     __tablename__ = 'brands'
 
     id = db.Column(db.Integer, primary_key=True)
-    firebase_uid = db.Column(db.String(128), unique=True, nullable=False, index=True)
     company_name = db.Column(db.String(255), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
     industry = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(200))
     website = db.Column(db.String(500))
@@ -65,10 +82,22 @@ class Brand(db.Model):
 
     campaigns = db.relationship('Campaign', backref='brand', lazy='dynamic', cascade='all, delete-orphan')
 
-    def to_dict(self):
-        return {
+    def set_password(self, password):
+        """Hash and set password"""
+        self.password_hash = hash_password(password)
+    
+    def check_password(self, password):
+        """Verify password against stored hash"""
+        return verify_password(self.password_hash, password)
+
+    def to_dict(self, include_sensitive=False):
+        """
+        Convert model to dictionary
+        Args:
+            include_sensitive: If True, includes password_hash (use with caution!)
+        """
+        data = {
             'id': self.id,
-            'firebase_uid': self.firebase_uid,
             'company_name': self.company_name,
             'email': self.email,
             'industry': self.industry,
@@ -79,6 +108,10 @@ class Brand(db.Model):
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
         }
+        # Never include password hash in normal responses
+        if include_sensitive:
+            data['password_hash'] = self.password_hash
+        return data
 
     def __repr__(self):
         return f'<Brand {self.company_name}>'

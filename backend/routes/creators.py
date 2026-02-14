@@ -94,55 +94,17 @@ def get_creator(creator_id):
 
 @creators_bp.route('', methods=['POST'])
 def create_creator():
+    """
+    DEPRECATED: Use /api/auth/register/creator instead
     
-    try:
-        data = request.get_json()
-
-        required = ['firebase_uid', 'username', 'email', 'platform', 'category', 'rate']
-        missing = [f for f in required if not data.get(f)]
-
-        if missing:
-            return jsonify({
-                'status': 'error',
-                'message': f'missing: {", ".join(missing)}'
-            }), 400
-
-        # Check if Firebase UID already exists
-        if Creator.query.filter_by(firebase_uid=data['firebase_uid']).first():
-            return jsonify({'status': 'error', 'message': 'account already exists'}), 400
-
-        if Creator.query.filter_by(username=data['username']).first():
-            return jsonify({'status': 'error', 'message': 'username exists'}), 400
-
-        if Creator.query.filter_by(email=data['email']).first():
-            return jsonify({'status': 'error', 'message': 'email exists'}), 400
-
-        creator = Creator(
-            firebase_uid=data['firebase_uid'],
-            username=data['username'],
-            email=data['email'],
-            platform=data['platform'],
-            followers_count=data.get('followers_count', 0),
-            engagement_rate=data.get('engagement_rate', 0.0),
-            category=data['category'],
-            location=data.get('location'),
-            rate=data['rate'],
-            bio=data.get('bio'),
-            profile_image_url=data.get('profile_image_url'),
-        )
-
-        db.session.add(creator)
-        db.session.commit()
-
-        return jsonify({
-            'status': 'success',
-            'message': 'created',
-            'data': creator.to_dict()
-        }), 201
-
-    except Exception as error:
-        db.session.rollback()
-        return jsonify({'status': 'error', 'message': 'error'}), 500
+    This endpoint is kept for backward compatibility but should not be used.
+    Registration is now handled through the auth routes which includes
+    password management and JWT token generation.
+    """
+    return jsonify({
+        'status': 'error',
+        'message': 'This endpoint is deprecated. Please use /api/auth/register/creator for registration'
+    }), 410  # 410 Gone status code
 
 
 @creators_bp.route('/<int:creator_id>', methods=['PUT'])

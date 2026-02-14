@@ -9,10 +9,14 @@ class Config:
     # base settings
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///collabstr.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     DEBUG = False
     TESTING = False
     JSON_SORT_KEYS = False
+    
+    # JWT Configuration
+    JWT_EXPIRATION_HOURS = int(os.getenv('JWT_EXPIRATION_HOURS', 168))  # 7 days default
+    JWT_ALGORITHM = 'HS256'
 
 
 class DevelopmentConfig(Config):

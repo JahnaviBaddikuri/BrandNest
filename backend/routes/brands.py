@@ -51,51 +51,17 @@ def get_brand(brand_id):
 
 @brands_bp.route('', methods=['POST'], strict_slashes=False)
 def create_brand():
+    """
+    DEPRECATED: Use /api/auth/register/brand instead
     
-    try:
-        data = request.get_json()
-
-        required = ['firebase_uid', 'company_name', 'email', 'industry']
-        missing = [f for f in required if not data.get(f)]
-
-        if missing:
-            return jsonify({
-                'status': 'error',
-                'message': f'missing: {", ".join(missing)}'
-            }), 400
-
-        # Check if Firebase UID already exists
-        if Brand.query.filter_by(firebase_uid=data['firebase_uid']).first():
-            return jsonify({'status': 'error', 'message': 'account already exists'}), 400
-
-        if Brand.query.filter_by(company_name=data['company_name']).first():
-            return jsonify({'status': 'error', 'message': 'name exists'}), 400
-
-        if Brand.query.filter_by(email=data['email']).first():
-            return jsonify({'status': 'error', 'message': 'email exists'}), 400
-
-        brand = Brand(
-            firebase_uid=data['firebase_uid'],
-            company_name=data['company_name'],
-            email=data['email'],
-            industry=data['industry'],
-            location=data.get('location'),
-            website=data.get('website'),
-            logo_url=data.get('logo_url'),
-        )
-
-        db.session.add(brand)
-        db.session.commit()
-
-        return jsonify({
-            'status': 'success',
-            'message': 'created',
-            'data': brand.to_dict()
-        }), 201
-
-    except Exception as error:
-        db.session.rollback()
-        return jsonify({'status': 'error', 'message': 'error'}), 500
+    This endpoint is kept for backward compatibility but should not be used.
+    Registration is now handled through the auth routes which includes
+    password management and JWT token generation.
+    """
+    return jsonify({
+        'status': 'error',
+        'message': 'This endpoint is deprecated. Please use /api/auth/register/brand for registration'
+    }), 410  # 410 Gone status code
 
 
 @brands_bp.route('/<int:brand_id>', methods=['PUT'])
