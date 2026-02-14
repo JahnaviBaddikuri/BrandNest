@@ -62,12 +62,12 @@ async function uploadProfileImage(file) {
     return '';
   }
 
-  console.log('📤 Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
+  console.log(' Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
 
   const payload = new FormData();
   payload.append('file', file);
 
-  console.log('📦 FormData created, sending to backend...');
+  console.log(' FormData created, sending to backend...');
 
   const response = await fetch(`${API_BASE}/creators/upload-profile`, {
     method: 'POST',
@@ -282,8 +282,8 @@ function setupCreatorPage() {
         ? profileImageInput.files[0]
         : null;
       
-      console.log('📋 Profile image input:', profileImageInput);
-      console.log('📁 Profile image file:', profileImageFile);
+      console.log(' Profile image input:', profileImageInput);
+      console.log(' Profile image file:', profileImageFile);
       
       const data = {
         email: formData.get('email'),
@@ -346,9 +346,9 @@ function setupCreatorPage() {
         await firebaseUser.updateProfile({ displayName: data.username });
 
         // Step 2: Upload profile image if provided
-        console.log('🖼️ About to upload image:', profileImageFile);
+        console.log(' About to upload image:', profileImageFile);
         data.profile_image_url = await uploadProfileImage(profileImageFile);
-        console.log('✅ Image upload result:', data.profile_image_url);
+        console.log(' Image upload result:', data.profile_image_url);
 
         // Step 3: Send profile to backend with Firebase UID
         data.firebase_uid = firebaseUser.uid; // Add Firebase UID!
@@ -629,7 +629,7 @@ function loadUserProfile(user) {
   const verificationStatus = document.getElementById('verificationStatus');
   if (verificationStatus) {
     const isVerified = user.is_verified || user.verified;
-    verificationStatus.textContent = isVerified ? 'Approved ✓' : 'Pending Admin Approval';
+    verificationStatus.textContent = isVerified ? 'Approved' : 'Pending Admin Approval';
     verificationStatus.className = 'detail-value ' + (isVerified ? 'verified' : 'pending');
   }
 

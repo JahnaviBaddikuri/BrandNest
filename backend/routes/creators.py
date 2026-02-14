@@ -17,13 +17,13 @@ def is_allowed_image(filename):
 
 @creators_bp.route('/upload-profile', methods=['POST'])
 def upload_profile_image():
-    print('🔍 Upload request received')
+    print('   Upload request received')
     print('   request.files:', request.files)
     print('   request.form:', request.form)
     print('   request.content_type:', request.content_type)
     
     if 'file' not in request.files:
-        print('❌ No file found in request.files')
+        print('  No file found in request.files')
         return jsonify({'status': 'error', 'message': 'missing file'}), 400
 
     file = request.files['file']
