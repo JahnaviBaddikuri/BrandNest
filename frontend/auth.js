@@ -345,13 +345,16 @@ function setupCreatorPage() {
           throw new Error(result.message || 'Failed to create account');
         }
 
-        // Step 3: Save JWT token and user data
-        saveUserSession(result.data.user, result.data.token);
+        // Step 3: Store temporary data and redirect to verification page
+        sessionStorage.setItem('pending_verification', JSON.stringify({
+          email: result.data.email,
+          role: result.data.role
+        }));
 
-        showMessage('authMessage', 'Account created successfully! Redirecting...', 'success');
+        showMessage('authMessage', 'Account created! Redirecting to verification...', 'success');
 
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          window.location.href = 'verify-email.html';
         }, 1200);
       } catch (error) {
         showMessage('authMessage', error.message || 'Failed to create account. Please try again.', 'error');
@@ -440,16 +443,128 @@ function setupBrandPage() {
           throw new Error(result.message || 'Failed to create account');
         }
 
-        // Save JWT token and user data
-        saveUserSession(result.data.user, result.data.token);
+        // Step 3: Store temporary data and redirect to verification page
+        sessionStorage.setItem('pending_verification', JSON.stringify({
+          email: result.data.email,
+          role: result.data.role
+        }));
 
-        showMessage('authMessage', 'Brand account created successfully! Redirecting...', 'success');
+        showMessage('authMessage', 'Account created! Redirecting to verification...', 'success');
 
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          window.location.href = 'verify-email.html';
         }, 1200);
       } catch (error) {
         showMessage('authMessage', error.message || 'Failed to create account. Please try again.', 'error');
+      }
+    });
+  }
+}
+
+// ==========================================
+// EMAIL VERIFICATION PAGE LOGIC
+// ==========================================
+
+function setupVerifyEmailPage() {
+  const verifyForm = document.getElementById('verifyForm');
+  const resendBtn = document.getElementById('resendBtn');
+  const userEmailEl = document.getElementById('userEmail');
+  const otpInput = document.getElementById('otpCode');
+
+  // Get pending verification data
+  const pendingData = sessionStorage.getItem('pending_verification');
+  
+  if (!pendingData) {
+    // No pending verification, redirect to login
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const { email, role } = JSON.parse(pendingData);
+  
+  // Display email
+  if (userEmailEl) {
+    userEmailEl.textContent = email;
+  }
+
+  // Auto-format OTP input (only digits)
+  if (otpInput) {
+    otpInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+  }
+
+  // Handle verify form submission
+  if (verifyForm) {
+    verifyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const otp = otpInput.value.trim();
+
+      if (otp.length !== 4) {
+        setFieldError('otp', 'Please enter a 4-digit code');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/auth/verify-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, role })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Verification failed');
+        }
+
+        // Clear pending verification data
+        sessionStorage.removeItem('pending_verification');
+
+        showMessage('authMessage', 'Email verified successfully! Redirecting to login...', 'success');
+
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+
+      } catch (error) {
+        showMessage('authMessage', error.message || 'Verification failed. Please try again.', 'error');
+      }
+    });
+  }
+
+  // Handle resend OTP
+  if (resendBtn) {
+    resendBtn.addEventListener('click', async () => {
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(`${API_BASE}/auth/resend-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, role })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to resend code');
+        }
+
+        showMessage('authMessage', 'New code sent to your email!', 'success');
+        
+        setTimeout(() => {
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend Code';
+        }, 3000);
+
+      } catch (error) {
+        showMessage('authMessage', error.message || 'Failed to resend code.', 'error');
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend Code';
       }
     });
   }
@@ -640,6 +755,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCreatorPage();
   } else if (currentPage === 'join-brand.html') {
     setupBrandPage();
+  } else if (currentPage === 'verify-email.html') {
+    setupVerifyEmailPage();
   } else if (currentPage === 'dashboard.html') {
     setupDashboardPage();
   }

@@ -3,6 +3,7 @@ from flask_cors import CORS
 from config import get_config
 from models import db
 from routes import register_routes
+from email_service import init_mail
 import os
 
 
@@ -13,6 +14,7 @@ def create_app():
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     db.init_app(app)
+    init_mail(app)  # Initialize email service
     CORS(app)
     register_routes(app)
     

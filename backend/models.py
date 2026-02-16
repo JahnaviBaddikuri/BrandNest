@@ -21,6 +21,9 @@ class Creator(db.Model):
     bio = db.Column(db.Text)
     profile_image_url = db.Column(db.String(500))
     is_verified = db.Column(db.Boolean, default=False)
+    email_verified = db.Column(db.Boolean, default=False)
+    otp_code = db.Column(db.String(10), nullable=True)
+    otp_expiry = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -77,6 +80,9 @@ class Brand(db.Model):
     website = db.Column(db.String(500))
     logo_url = db.Column(db.String(500))
     verified = db.Column(db.Boolean, default=False)
+    email_verified = db.Column(db.Boolean, default=False)
+    otp_code = db.Column(db.String(10), nullable=True)
+    otp_expiry = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

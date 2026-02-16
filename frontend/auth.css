@@ -305,3 +305,61 @@
   color: #999;
   cursor: not-allowed;
 }
+
+/* ===========================
+   EMAIL VERIFICATION PAGE
+   =========================== */
+
+.auth-card__header strong {
+  color: #000;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+#otpCode {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 20px;
+}
+
+#otpCode::placeholder {
+  letter-spacing: 8px;
+  opacity: 0.3;
+}
+
+.form-footer {
+  margin-top: 30px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.form-footer p {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.btn--text {
+  background: none;
+  border: none;
+  color: #000;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+  text-decoration: underline;
+  transition: opacity 0.2s;
+}
+
+.btn--text:hover {
+  opacity: 0.7;
+}
+
+.btn--text:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

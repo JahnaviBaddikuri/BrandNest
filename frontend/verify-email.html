@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Email</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <div class="nav__logo"><a href="index.html">collabstr</a></div>
+      <nav class="nav__links">
+        <a href="index.html#marketplace">Search</a>
+        <a href="index.html#how">How It Works</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#case-studies">Case Studies</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="btn btn--ghost" onclick="window.location.href='login.html'">Login</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-container">
+    <div class="auth-card">
+      <div class="auth-card__header">
+        <h1>Verify Your Email</h1>
+        <p>We've sent a 4-digit verification code to <strong id="userEmail"></strong></p>
+      </div>
+
+      <form class="auth-form" id="verifyForm">
+        <div class="form-group">
+          <label for="otpCode">Enter 4-Digit Code</label>
+          <input 
+            id="otpCode" 
+            name="otp" 
+            type="text" 
+            placeholder="____" 
+            maxlength="4"
+            pattern="[0-9]{4}"
+            required 
+            autocomplete="off"
+            autofocus
+          />
+          <span class="error-message" id="otpError"></span>
+        </div>
+
+        <button type="submit" class="btn btn--full" id="verifyBtn">Verify Email</button>
+        
+        <div class="form-footer">
+          <p>Didn't receive the code?</p>
+          <button type="button" class="btn btn--text" id="resendBtn">Resend Code</button>
+        </div>
+      </form>
+
+      <div class="auth-message" id="authMessage"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer__brand">collabstr</div>
+    <div class="footer__links"></div>
+    <p class="footer__copy">&copy; 2024 Collabstr. All rights reserved.</p>
+  </footer>
+
+  <script src="auth.js"></script>
+</body>
+</html>

@@ -7,6 +7,8 @@ from flask import Blueprint, request, jsonify
 from models import db, Creator, Brand
 from jwt_auth import require_auth, get_user_from_request, generate_token
 from password_utils import validate_password_strength
+from otp_utils import generate_otp, generate_otp_expiry, is_otp_valid
+from email_service import send_otp_email
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -77,31 +79,42 @@ def register_creator():
             engagement_rate=data.get('engagement_rate', 0.0),
             location=data.get('location'),
             bio=data.get('bio'),
-            profile_image_url=data.get('profile_image_url', '')
+            profile_image_url=data.get('profile_image_url', ''),
+            email_verified=False  # Not verified yet
         )
         
         # Set password (this hashes it)
         creator.set_password(data['password'])
         
+        # Generate OTP
+        otp_code = generate_otp(length=4)
+        creator.otp_code = otp_code
+        creator.otp_expiry = generate_otp_expiry(minutes=5)
+        
         # Save to database
         db.session.add(creator)
         db.session.commit()
         
-        # Generate JWT token
-        token = generate_token(
-            user_id=creator.id,
-            email=creator.email,
-            role='creator'
+        # Send OTP email
+        email_sent, email_error = send_otp_email(
+            recipient_email=creator.email,
+            otp_code=otp_code,
+            user_name=creator.username
         )
         
-        # Return success with token and profile
+        if not email_sent:
+            print(f"⚠️  Failed to send OTP email: {email_error}")
+            # Don't fail registration if email fails
+        
+        # Return success WITHOUT token (user must verify email first)
         return jsonify({
             'status': 'success',
-            'message': 'Creator account created successfully',
+            'message': 'Account created successfully. Please check your email for verification code.',
             'data': {
-                'token': token,
-                'user': creator.to_dict(),
-                'role': 'creator'
+                'email': creator.email,
+                'user_id': creator.id,
+                'role': 'creator',
+                'requires_verification': True
             }
         }), 201
         
@@ -173,31 +186,42 @@ def register_brand():
             industry=data['industry'],
             location=data.get('location'),
             website=data.get('website'),
-            logo_url=data.get('logo_url', '')
+            logo_url=data.get('logo_url', ''),
+            email_verified=False  # Not verified yet
         )
         
         # Set password (this hashes it)
         brand.set_password(data['password'])
         
+        # Generate OTP
+        otp_code = generate_otp(length=4)
+        brand.otp_code = otp_code
+        brand.otp_expiry = generate_otp_expiry(minutes=5)
+        
         # Save to database
         db.session.add(brand)
         db.session.commit()
         
-        # Generate JWT token
-        token = generate_token(
-            user_id=brand.id,
-            email=brand.email,
-            role='brand'
+        # Send OTP email
+        email_sent, email_error = send_otp_email(
+            recipient_email=brand.email,
+            otp_code=otp_code,
+            user_name=brand.company_name
         )
         
-        # Return success with token and profile
+        if not email_sent:
+            print(f"⚠️  Failed to send OTP email: {email_error}")
+            # Don't fail registration if email fails
+        
+        # Return success WITHOUT token (user must verify email first)
         return jsonify({
             'status': 'success',
-            'message': 'Brand account created successfully',
+            'message': 'Account created successfully. Please check your email for verification code.',
             'data': {
-                'token': token,
-                'user': brand.to_dict(),
-                'role': 'brand'
+                'email': brand.email,
+                'user_id': brand.id,
+                'role': 'brand',
+                'requires_verification': True
             }
         }), 201
         
@@ -266,6 +290,15 @@ def login():
                 'status': 'error',
                 'message': 'Invalid email or password'
             }), 401
+        
+        # Check if email is verified (treat NULL as verified for existing users)
+        if hasattr(user, 'email_verified') and user.email_verified is False:
+            return jsonify({
+                'status': 'error',
+                'message': 'Please verify your email before logging in. Check your email for the verification code.',
+                'requires_verification': True,
+                'email': user.email
+            }), 403
         
         # Generate JWT token
         token = generate_token(
@@ -382,3 +415,179 @@ def get_current_user(current_user):
             'role': current_user['role']
         }
     }), 200
+
+
+@auth_bp.route('/verify-email', methods=['POST'])
+def verify_email():
+    """
+    Verify email with OTP code
+    
+    Expected JSON:
+        {
+            "email": "user@example.com",
+            "otp": "1234",
+            "role": "creator" or "brand"
+        }
+    
+    Returns:
+        200: Email verified successfully
+        400: Invalid or expired OTP
+        404: User not found
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        email = data.get('email')
+        otp = data.get('otp')
+        role = data.get('role')
+        
+        if not all([email, otp, role]):
+            return jsonify({
+                'status': 'error',
+                'message': 'Email, OTP, and role are required'
+            }), 400
+        
+        if role not in ['creator', 'brand']:
+            return jsonify({
+                'status': 'error',
+                'message': 'Role must be either "creator" or "brand"'
+            }), 400
+        
+        # Find user based on role
+        user = None
+        if role == 'creator':
+            user = Creator.query.filter_by(email=email).first()
+        else:
+            user = Brand.query.filter_by(email=email).first()
+        
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'User not found'
+            }), 404
+        
+        # Check if already verified
+        if user.email_verified:
+            return jsonify({
+                'status': 'success',
+                'message': 'Email already verified. You can now log in.',
+                'already_verified': True
+            }), 200
+        
+        # Validate OTP
+        is_valid, error_message = is_otp_valid(user.otp_code, user.otp_expiry, otp)
+        
+        if not is_valid:
+            return jsonify({
+                'status': 'error',
+                'message': error_message
+            }), 400
+        
+        # Mark email as verified
+        user.email_verified = True
+        user.otp_code = None  # Clear OTP
+        user.otp_expiry = None
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Email verified successfully! You can now log in.'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Verification failed: {str(e)}'
+        }), 500
+
+
+@auth_bp.route('/resend-otp', methods=['POST'])
+def resend_otp():
+    """
+    Resend OTP code to email
+    
+    Expected JSON:
+        {
+            "email": "user@example.com",
+            "role": "creator" or "brand"
+        }
+    
+    Returns:
+        200: OTP resent successfully
+        404: User not found
+        400: Email already verified
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        email = data.get('email')
+        role = data.get('role')
+        
+        if not all([email, role]):
+            return jsonify({
+                'status': 'error',
+                'message': 'Email and role are required'
+            }), 400
+        
+        if role not in ['creator', 'brand']:
+            return jsonify({
+                'status': 'error',
+                'message': 'Role must be either "creator" or "brand"'
+            }), 400
+        
+        # Find user based on role
+        user = None
+        user_name = None
+        if role == 'creator':
+            user = Creator.query.filter_by(email=email).first()
+            user_name = user.username if user else None
+        else:
+            user = Brand.query.filter_by(email=email).first()
+            user_name = user.company_name if user else None
+        
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'User not found'
+            }), 404
+        
+        # Check if already verified
+        if user.email_verified:
+            return jsonify({
+                'status': 'error',
+                'message': 'Email already verified. You can log in now.'
+            }), 400
+        
+        # Generate new OTP
+        otp_code = generate_otp(length=4)
+        user.otp_code = otp_code
+        user.otp_expiry = generate_otp_expiry(minutes=5)
+        db.session.commit()
+        
+        # Send OTP email
+        email_sent, email_error = send_otp_email(
+            recipient_email=user.email,
+            otp_code=otp_code,
+            user_name=user_name
+        )
+        
+        if not email_sent:
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to send email: {email_error}'
+            }), 500
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'OTP has been resent to your email'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to resend OTP: {str(e)}'
+        }), 500

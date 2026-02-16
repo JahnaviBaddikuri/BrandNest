@@ -17,6 +17,15 @@ class Config:
     # JWT Configuration
     JWT_EXPIRATION_HOURS = int(os.getenv('JWT_EXPIRATION_HOURS', 168))  # 7 days default
     JWT_ALGORITHM = 'HS256'
+    
+    # Email Configuration
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp-mail.outlook.com')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', 'False').lower() == 'true'
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', os.getenv('MAIL_USERNAME'))
 
 
 class DevelopmentConfig(Config):
