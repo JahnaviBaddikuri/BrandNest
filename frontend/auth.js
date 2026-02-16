@@ -66,6 +66,31 @@ async function uploadProfileImage(file) {
   return result.data?.url || '';
 }
 
+async function uploadBrandLogo(file) {
+  if (!file) {
+    return '';
+  }
+
+  console.log(' Uploading brand logo:', file.name, 'Size:', file.size, 'Type:', file.type);
+
+  const payload = new FormData();
+  payload.append('file', file);
+
+  console.log(' FormData created, sending to backend...');
+
+  const response = await fetch(`${API_BASE}/brands/upload-logo`, {
+    method: 'POST',
+    body: payload,
+  });
+
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || 'Failed to upload logo');
+  }
+
+  return result.data?.url || '';
+}
+
 function setFieldError(fieldName, message) {
   const errorEl = document.getElementById(`${fieldName}Error`);
   const inputEl = document.querySelector(`[name="${fieldName}"]`);
@@ -350,6 +375,14 @@ function setupBrandPage() {
       clearErrors();
 
       const formData = new FormData(brandForm);
+      const brandLogoInput = document.getElementById('brandLogo');
+      const brandLogoFile = brandLogoInput && brandLogoInput.files
+        ? brandLogoInput.files[0]
+        : null;
+      
+      console.log('🏢 Brand logo input:', brandLogoInput);
+      console.log('🏢 Brand logo file:', brandLogoFile);
+      
       const data = {
         email: formData.get('email'),
         password: formData.get('password'),
@@ -357,7 +390,7 @@ function setupBrandPage() {
         industry: formData.get('industry'),
         location: formData.get('location'),
         website: formData.get('website'),
-        logo_url: formData.get('logo_url'),
+        logo_url: '',
         verified: formData.get('verified') === 'on'
       };
 
@@ -389,7 +422,12 @@ function setupBrandPage() {
       }
 
       try {
-        // Register with JWT backend
+        // Step 1: Upload brand logo if provided
+        console.log('🏢 About to upload brand logo:', brandLogoFile);
+        data.logo_url = await uploadBrandLogo(brandLogoFile);
+        console.log('🏢 Logo upload result:', data.logo_url);
+
+        // Step 2: Register with JWT backend
         const response = await fetch(`${API_BASE}/auth/register/brand`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
