@@ -31,7 +31,7 @@ instance/
 *.db
 *.sqlite
 *.sqlite3
-collabstr.db
+brandnest.db
 
 # IDE and Editor
 .vscode/

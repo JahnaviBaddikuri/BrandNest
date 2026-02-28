@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Requests - BrandNest</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="nav">
+            <div class="nav__logo"><a href="index.html"><img src="nature_14835036.png" alt="BrandNest Logo">BrandNest</a></div>
+            <nav class="nav__links"></nav>
+            <div class="nav__actions">
+                <button class="btn btn--ghost" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <nav class="dashboard-nav">
+                <a href="dashboard.html" class="dashboard-nav__link"><span>Profile</span></a>
+                <a href="requests.html" class="dashboard-nav__link active"><span>Contact Requests</span></a>
+                <a href="campaigns.html" class="dashboard-nav__link"><span>Campaigns</span></a>
+                <a href="messages.html" class="dashboard-nav__link"><span>Messages</span></a>
+                <a href="orders.html" class="dashboard-nav__link"><span>Orders</span></a>
+                <a href="dashboard.html#settings" class="dashboard-nav__link"><span>Settings</span></a>
+            </nav>
+        </aside>
+
+        <section class="dashboard-content">
+            <div class="section-header" style="margin-bottom:20px;">
+                <h1 id="pageTitle">Contact Requests</h1>
+                <p id="welcomeMessage">Welcome!</p>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="tab-btn active" data-status="all">All</button>
+                <button class="tab-btn" data-status="pending">Pending</button>
+                <button class="tab-btn" data-status="accepted">Accepted</button>
+                <button class="tab-btn" data-status="rejected">Rejected</button>
+            </div>
+
+            <!-- Requests List -->
+            <div id="requestsContainer" class="requests-container">
+                <div class="loading">Loading requests...</div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <h3>No contact requests yet</h3>
+                <p id="emptyStateMessage"></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer__brand">BrandNest</div>
+        <div class="footer__links"></div>
+        <p class="footer__copy">&copy; 2024 BrandNest. All rights reserved.</p>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        let currentUser = null;
+        let allRequests = [];
+        let currentFilter = 'all';
+
+        // Check authentication
+        checkAuthAndSetup();
+
+        function checkAuthAndSetup() {
+            if (!isUserLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = getUserSession();
+            
+            // Update welcome message
+            const welcomeName = currentUser.role === 'brand' ? 
+                currentUser.company_name : currentUser.username;
+            document.getElementById('welcomeMessage').textContent = `Welcome, ${welcomeName}!`;
+            
+            // Update page title based on role
+            if (currentUser.role === 'brand') {
+                document.getElementById('pageTitle').textContent = 'Sent Requests';
+                document.getElementById('emptyStateMessage').textContent = 
+                    'You haven\'t sent any contact requests yet. Browse creators in the marketplace to get started!';
+            } else {
+                document.getElementById('pageTitle').textContent = 'Contact Requests';
+                document.getElementById('emptyStateMessage').textContent = 
+                    'You haven\'t received any contact requests yet.';
+            }
+            
+            // Load requests
+            loadContactRequests();
+            
+            // Setup filter tabs
+            setupFilterTabs();
+            
+            // Setup logout
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                clearUserSession();
+                window.location.href = 'index.html';
+            });
+        }
+
+        async function loadContactRequests(status = null) {
+            try {
+                const url = status && status !== 'all' ? 
+                    `${API_BASE}/contact-requests?status=${status}` : 
+                    `${API_BASE}/contact-requests`;
+                
+                const response = await authenticatedFetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load requests');
+                }
+                
+                const data = await response.json();
+                allRequests = data.requests || [];
+                
+                displayRequests(allRequests);
+                
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                showError('Failed to load contact requests. Please try again.');
+            }
+        }
+
+        function displayRequests(requests) {
+            const container = document.getElementById('requestsContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (!requests || requests.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'block';
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = requests.map(req => createRequestCard(req)).join('');
+            
+            // Add event listeners to action buttons
+            if (currentUser.role === 'creator') {
+                requests.forEach(req => {
+                    if (req.status === 'pending') {
+                        const acceptBtn = document.getElementById(`accept-${req.id}`);
+                        const rejectBtn = document.getElementById(`reject-${req.id}`);
+                        
+                        if (acceptBtn) {
+                            acceptBtn.addEventListener('click', () => respondToRequest(req.id, 'accept'));
+                        }
+                        if (rejectBtn) {
+                            rejectBtn.addEventListener('click', () => respondToRequest(req.id, 'reject'));
+                        }
+                    }
+                });
+            }
+        }
+
+        function createRequestCard(request) {
+            const isCreator = currentUser.role === 'creator';
+            const otherParty = isCreator ? request.brand : request.creator;
+            const otherPartyName = isCreator ? otherParty.company_name : otherParty.username;
+            const otherPartyImage = isCreator ? otherParty.logo_url : otherParty.profile_image_url;
+            const otherPartyInfo = isCreator ? 
+                `${otherParty.industry}` : 
+                `${otherParty.platform} • ${otherParty.category}`;
+            
+            // Status badge
+            const statusClass = request.status === 'accepted' ? 'status-accepted' : 
+                               request.status === 'rejected' ? 'status-rejected' : 'status-pending';
+            
+            // Action buttons for creators (only if pending)
+            const actionButtons = isCreator && request.status === 'pending' ? `
+                <div class="request-actions">
+                    <button id="accept-${request.id}" class="btn btn-accept">Accept</button>
+                    <button id="reject-${request.id}" class="btn btn-reject">Reject</button>
+                </div>
+            ` : '';
+            
+            // Show contact info if accepted
+            const contactInfo = request.status === 'accepted' ? `
+                <div class="contact-info">
+                    <p><strong>📧 Email:</strong> ${isCreator ? otherParty.email : otherParty.email}</p>
+                    ${isCreator && otherParty.website ? `<p><strong>🌐 Website:</strong> <a href="${otherParty.website}" target="_blank">${otherParty.website}</a></p>` : ''}
+                </div>
+            ` : '';
+            
+            return `
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="party-info">
+                            <div class="party-image">
+                                ${otherPartyImage ? 
+                                    `<img src="${otherPartyImage}" alt="${otherPartyName}">` :
+                                    `<div class="initials">${getInitials(otherPartyName)}</div>`
+                                }
+                            </div>
+                            <div class="party-details">
+                                <h3>${otherPartyName}</h3>
+                                <p class="party-meta">${otherPartyInfo}</p>
+                            </div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${request.status}</span>
+                    </div>
+                    
+                    ${request.message ? `
+                        <div class="request-message">
+                            <strong>Message:</strong>
+                            <p>${request.message}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${contactInfo}
+                    
+                    <div class="request-footer">
+                        <span class="request-date">${formatDate(request.created_at)}</span>
+                        ${actionButtons}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function respondToRequest(requestId, action) {
+            try {
+                const response = await authenticatedFetch(`${API_BASE}/contact-requests/${requestId}/respond`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to respond to request');
+                }
+                
+                const data = await response.json();
+                
+                // Show success message
+                showSuccess(`Contact request ${action}ed successfully!`);
+                
+                // Reload requests
+                loadContactRequests(currentFilter === 'all' ? null : currentFilter);
+                
+            } catch (error) {
+                console.error('Error responding to request:', error);
+                showError(error.message);
+            }
+        }
+
+        function setupFilterTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Filter requests
+                    const status = tab.dataset.status;
+                    currentFilter = status;
+                    
+                    if (status === 'all') {
+                        displayRequests(allRequests);
+                    } else {
+                        const filtered = allRequests.filter(req => req.status === status);
+                        displayRequests(filtered);
+                    }
+                });
+            });
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 60) {
+                return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+            } else if (diffHours < 24) {
+                return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+            } else if (diffDays < 7) {
+                return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+
+        function showSuccess(message) {
+            alert(message);
+        }
+    </script>
+
+
+</body>
+</html>

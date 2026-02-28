@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaigns - BrandNest</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="nav">
+            <div class="nav__logo"><a href="index.html"><img src="nature_14835036.png" alt="BrandNest Logo">BrandNest</a></div>
+            <nav class="nav__links"></nav>
+            <div class="nav__actions">
+                <button class="btn btn--ghost" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <nav class="dashboard-nav">
+                <a href="dashboard.html" class="dashboard-nav__link"><span>Profile</span></a>
+                <a href="requests.html" class="dashboard-nav__link"><span>Contact Requests</span></a>
+                <a href="campaigns.html" class="dashboard-nav__link active"><span>Campaigns</span></a>
+                <a href="messages.html" class="dashboard-nav__link"><span>Messages</span></a>
+                <a href="orders.html" class="dashboard-nav__link"><span>Orders</span></a>
+                <a href="dashboard.html#settings" class="dashboard-nav__link"><span>Settings</span></a>
+            </nav>
+        </aside>
+
+        <section class="dashboard-content">
+            <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+                <div>
+                    <h1 id="pageTitle">Campaigns</h1>
+                    <p id="welcomeMessage">Welcome!</p>
+                </div>
+                <button class="btn" id="createCampaignBtn" style="display:none;">+ New Campaign</button>
+            </div>
+
+            <!-- Create Campaign Modal -->
+            <div id="createCampaignModal" class="modal-overlay" style="display:none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Create Campaign</h2>
+                        <button class="modal-close" id="closeModal">&times;</button>
+                    </div>
+                    <form id="createCampaignForm">
+                        <div class="form-group">
+                            <label>Campaign Title *</label>
+                            <input type="text" id="campTitle" class="form-input" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Description *</label>
+                            <textarea id="campDescription" class="form-input" rows="3" required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Budget ($)</label>
+                                <input type="number" id="campBudget" class="form-input" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label>Max Per Creator ($)</label>
+                                <input type="number" id="campMaxPerCreator" class="form-input" min="0" step="0.01" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Target Platform</label>
+                                <select id="campPlatform" class="form-input">
+                                    <option value="">Any</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="YouTube">YouTube</option>
+                                    <option value="UGC">UGC</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Target Category</label>
+                                <select id="campCategory" class="form-input">
+                                    <option value="">Any</option>
+                                    <option value="Fashion">Fashion</option>
+                                    <option value="Beauty">Beauty</option>
+                                    <option value="Fitness">Fitness</option>
+                                    <option value="Tech">Tech</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Travel">Travel</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Min Followers</label>
+                            <input type="number" id="campMinFollowers" class="form-input" min="0" />
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Start Date</label>
+                                <input type="date" id="campStartDate" class="form-input" />
+                            </div>
+                            <div class="form-group">
+                                <label>End Date</label>
+                                <input type="date" id="campEndDate" class="form-input" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn" style="width:100%;margin-top:10px;">Create Campaign</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Campaigns List -->
+            <div id="campaignsContainer" class="requests-container">
+                <div class="loading">Loading campaigns...</div>
+            </div>
+
+            <!-- Application Modal (for creators) -->
+            <div id="applyModal" class="modal-overlay" style="display:none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Apply to Campaign</h2>
+                        <button class="modal-close" id="closeApplyModal">&times;</button>
+                    </div>
+                    <form id="applyForm">
+                        <input type="hidden" id="applyCampaignId" />
+                        <div class="form-group">
+                            <label>Your Proposed Rate ($)</label>
+                            <input type="number" id="applyRate" class="form-input" min="0" step="0.01" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Message to Brand</label>
+                            <textarea id="applyMessage" class="form-input" rows="3" placeholder="Tell the brand why you'd be a great fit..."></textarea>
+                        </div>
+                        <button type="submit" class="btn" style="width:100%;margin-top:10px;">Submit Application</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Applications Section (for brands) -->
+            <div id="applicationsSection" style="display:none; margin-top:30px;">
+                <h2 id="applicationsTitle">Applications</h2>
+                <div id="applicationsContainer" class="requests-container"></div>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <h3>No campaigns yet</h3>
+                <p id="emptyMessage"></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer__brand">BrandNest</div>
+        <div class="footer__links"></div>
+        <p class="footer__copy">&copy; 2024 BrandNest. All rights reserved.</p>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        let currentUser = null;
+        let campaigns = [];
+        let myApplications = {};  // { campaign_id: { status, id } }
+
+        init();
+
+        function init() {
+            if (!isUserLoggedIn()) { window.location.href = 'login.html'; return; }
+            currentUser = getUserSession();
+
+            const name = currentUser.role === 'brand' ? currentUser.company_name : currentUser.username;
+            document.getElementById('welcomeMessage').textContent = `Welcome, ${name}!`;
+
+            // Show create button for brands only
+            if (currentUser.role === 'brand') {
+                document.getElementById('createCampaignBtn').style.display = 'inline-block';
+                document.getElementById('emptyMessage').textContent = 'Create your first campaign to start attracting creators!';
+            } else {
+                document.getElementById('pageTitle').textContent = 'Browse Campaigns';
+                document.getElementById('emptyMessage').textContent = 'No active campaigns right now. Check back soon!';
+            }
+
+            loadCampaigns();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                clearUserSession(); window.location.href = 'index.html';
+            });
+
+            // Create campaign modal
+            document.getElementById('createCampaignBtn')?.addEventListener('click', () => {
+                document.getElementById('createCampaignModal').style.display = 'flex';
+            });
+            document.getElementById('closeModal')?.addEventListener('click', () => {
+                document.getElementById('createCampaignModal').style.display = 'none';
+            });
+            document.getElementById('closeApplyModal')?.addEventListener('click', () => {
+                document.getElementById('applyModal').style.display = 'none';
+            });
+
+            // Create campaign form
+            document.getElementById('createCampaignForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = {
+                    title: document.getElementById('campTitle').value.trim(),
+                    description: document.getElementById('campDescription').value.trim(),
+                    budget: parseFloat(document.getElementById('campBudget').value) || null,
+                    max_budget_per_creator: parseFloat(document.getElementById('campMaxPerCreator').value) || null,
+                    target_platform: document.getElementById('campPlatform').value || null,
+                    target_category: document.getElementById('campCategory').value || null,
+                    min_followers: parseInt(document.getElementById('campMinFollowers').value) || null,
+                    start_date: document.getElementById('campStartDate').value || null,
+                    end_date: document.getElementById('campEndDate').value || null,
+                };
+
+                try {
+                    const response = await authenticatedFetch(`${API_BASE}/campaigns`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || result.message || 'Failed to create campaign');
+                    alert('Campaign created successfully!');
+                    document.getElementById('createCampaignModal').style.display = 'none';
+                    document.getElementById('createCampaignForm').reset();
+                    loadCampaigns();
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            });
+
+            // Apply form
+            document.getElementById('applyForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const campaignId = document.getElementById('applyCampaignId').value;
+                const data = {
+                    campaign_id: parseInt(campaignId),
+                    proposed_rate: parseFloat(document.getElementById('applyRate').value) || 0,
+                    message: document.getElementById('applyMessage').value.trim(),
+                };
+
+                try {
+                    const response = await authenticatedFetch(`${API_BASE}/applications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || result.message || 'Failed to apply');
+                    alert('Application submitted!');
+                    document.getElementById('applyModal').style.display = 'none';
+                    document.getElementById('applyForm').reset();
+                    loadCampaigns();
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            });
+        }
+
+        async function loadCampaigns() {
+            try {
+                // If creator, first fetch their applications to know which campaigns they applied to
+                if (currentUser.role === 'creator') {
+                    try {
+                        const appResponse = await authenticatedFetch(`${API_BASE}/applications/my`);
+                        const appData = await appResponse.json();
+                        if (appResponse.ok && appData.data) {
+                            myApplications = {};
+                            appData.data.forEach(a => {
+                                myApplications[a.campaign_id] = { status: a.status, id: a.id };
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('Could not fetch applications:', e);
+                    }
+                }
+
+                // Brands see their own campaigns; creators see all active
+                const url = currentUser.role === 'brand' ? `${API_BASE}/campaigns/my` : `${API_BASE}/campaigns`;
+                const response = await authenticatedFetch(url);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || data.message || 'Failed to load');
+
+                campaigns = data.data || data.campaigns || [];
+                displayCampaigns(campaigns);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('campaignsContainer').innerHTML = '<p style="color:red;">Failed to load campaigns.</p>';
+            }
+        }
+
+        function displayCampaigns(list) {
+            const container = document.getElementById('campaignsContainer');
+            const empty = document.getElementById('emptyState');
+
+            if (!list || list.length === 0) {
+                container.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+            container.style.display = 'block';
+            empty.style.display = 'none';
+
+            container.innerHTML = list.map(c => {
+                const budget = c.budget ? `$${Number(c.budget).toLocaleString()}` : 'Flexible';
+                const platform = c.target_platform || 'Any Platform';
+                const category = c.target_category || 'Any Category';
+                const statusClass = c.status === 'active' ? 'status-accepted' : c.status === 'closed' ? 'status-rejected' : 'status-pending';
+                const brandName = c.brand ? c.brand.company_name : '';
+
+                let actions = '';
+                if (currentUser.role === 'creator') {
+                    const myApp = myApplications[c.id];
+                    if (myApp) {
+                        const appStatusClass = myApp.status === 'accepted' ? 'status-accepted' : myApp.status === 'rejected' ? 'status-rejected' : 'status-pending';
+                        actions = `<span class="status-badge ${appStatusClass}" style="font-size:13px;">${myApp.status === 'pending' ? 'Applied' : myApp.status.charAt(0).toUpperCase() + myApp.status.slice(1)}</span>`;
+                    } else {
+                        actions = `<button class="btn btn-accept apply-btn" data-id="${c.id}">Apply</button>`;
+                    }
+                } else {
+                    actions = `<button class="btn view-apps-btn" data-id="${c.id}">View Applications</button>`;
+                }
+
+                return `
+                    <div class="request-card">
+                        <div class="request-header">
+                            <div class="party-info">
+                                <div class="party-details">
+                                    <h3>${c.title}</h3>
+                                    <p class="party-meta">${brandName ? brandName + ' • ' : ''}${platform} • ${category}</p>
+                                </div>
+                            </div>
+                            <span class="status-badge ${statusClass}">${c.status}</span>
+                        </div>
+                        <div class="request-message">
+                            <p>${c.description}</p>
+                        </div>
+                        <div class="request-footer">
+                            <span class="request-date">Budget: ${budget}${c.max_budget_per_creator ? ' (Max $' + c.max_budget_per_creator + '/creator)' : ''}</span>
+                            ${actions}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Bind apply buttons
+            container.querySelectorAll('.apply-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('applyCampaignId').value = btn.dataset.id;
+                    document.getElementById('applyModal').style.display = 'flex';
+                });
+            });
+
+            // Bind view applications buttons
+            container.querySelectorAll('.view-apps-btn').forEach(btn => {
+                btn.addEventListener('click', () => loadApplications(btn.dataset.id));
+            });
+        }
+
+        async function loadApplications(campaignId) {
+            try {
+                const response = await authenticatedFetch(`${API_BASE}/applications?campaign_id=${campaignId}`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || data.message || 'Failed');
+
+                const apps = data.data || data.applications || [];
+                const section = document.getElementById('applicationsSection');
+                const container = document.getElementById('applicationsContainer');
+                const camp = campaigns.find(c => c.id == campaignId);
+                document.getElementById('applicationsTitle').textContent = `Applications for "${camp?.title || 'Campaign'}"`;
+                section.style.display = 'block';
+
+                if (apps.length === 0) {
+                    container.innerHTML = '<p style="padding:20px;color:#999;">No applications yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = apps.map(app => {
+                    const creatorName = app.creator ? app.creator.username : 'Creator #' + app.creator_id;
+                    const statusClass = app.status === 'accepted' ? 'status-accepted' : app.status === 'rejected' ? 'status-rejected' : 'status-pending';
+                    let actions = '';
+                    if (app.status === 'pending') {
+                        actions = `
+                            <button class="btn btn-accept respond-btn" data-id="${app.id}" data-action="accept">Accept</button>
+                            <button class="btn btn-reject respond-btn" data-id="${app.id}" data-action="reject">Reject</button>
+                        `;
+                    } else if (app.status === 'accepted') {
+                        const cName = encodeURIComponent(creatorName);
+                        actions = `<a href="messages.html?partner_role=creator&partner_id=${app.creator_id}&partner_name=${cName}" class="btn btn-accept" style="text-decoration:none;">Message</a>`;
+                    }
+                    return `
+                        <div class="request-card">
+                            <div class="request-header">
+                                <div class="party-details">
+                                    <h3>${creatorName}</h3>
+                                    <p class="party-meta">Proposed Rate: $${app.proposed_rate || 0}</p>
+                                </div>
+                                <span class="status-badge ${statusClass}">${app.status}</span>
+                            </div>
+                            ${app.message ? `<div class="request-message"><p>${app.message}</p></div>` : ''}
+                            <div class="request-footer">
+                                <span class="request-date">${formatDate(app.created_at)}</span>
+                                <div class="request-actions">${actions}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.querySelectorAll('.respond-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        try {
+                            const response = await authenticatedFetch(`${API_BASE}/applications/${btn.dataset.id}/respond`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: btn.dataset.action }),
+                            });
+                            const result = await response.json();
+                            if (!response.ok) throw new Error(result.error || result.message || 'Failed');
+                            alert(`Application ${btn.dataset.action}ed!`);
+                            loadApplications(campaignId);
+                        } catch (error) {
+                            alert('Error: ' + error.message);
+                        }
+                    });
+                });
+            } catch (error) {
+                alert('Error loading applications: ' + error.message);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const diffMs = Date.now() - date;
+            const diffDays = Math.floor(diffMs / 86400000);
+            if (diffDays < 1) return 'Today';
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+    </script>
+
+
+</body>
+</html>

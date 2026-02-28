@@ -105,28 +105,28 @@ function setFieldError(fieldName, message) {
 
 // Session Management with JWT tokens
 function saveUserSession(userData, token) {
-  localStorage.setItem('collabstr_user', JSON.stringify(userData));
-  localStorage.setItem('collabstr_token', token);
-  localStorage.setItem('collabstr_logged_in', 'true');
+  localStorage.setItem('brandnest_user', JSON.stringify(userData));
+  localStorage.setItem('brandnest_token', token);
+  localStorage.setItem('brandnest_logged_in', 'true');
 }
 
 function getUserSession() {
-  const user = localStorage.getItem('collabstr_user');
+  const user = localStorage.getItem('brandnest_user');
   return user ? JSON.parse(user) : null;
 }
 
 function getAuthToken() {
-  return localStorage.getItem('collabstr_token');
+  return localStorage.getItem('brandnest_token');
 }
 
 function clearUserSession() {
-  localStorage.removeItem('collabstr_user');
-  localStorage.removeItem('collabstr_token');
-  localStorage.removeItem('collabstr_logged_in');
+  localStorage.removeItem('brandnest_user');
+  localStorage.removeItem('brandnest_token');
+  localStorage.removeItem('brandnest_logged_in');
 }
 
 function isUserLoggedIn() {
-  return localStorage.getItem('collabstr_logged_in') === 'true' && !!getAuthToken();
+  return localStorage.getItem('brandnest_logged_in') === 'true' && !!getAuthToken();
 }
 
 // Make authenticated API request with JWT token
@@ -242,11 +242,47 @@ function setupLoginPage() {
     });
   }
 
-  // Forgot Password functionality (TODO: Implement backend support)
+  // Forgot Password functionality
   if (forgotPasswordLink) {
     forgotPasswordLink.addEventListener('click', async (e) => {
       e.preventDefault();
-      showMessage('authMessage', 'Password reset feature coming soon. Please contact support.', 'error');
+      const email = prompt('Enter your email address:');
+      if (!email) return;
+      const role = document.getElementById('userRole')?.value;
+      if (!role) {
+        showMessage('authMessage', 'Please select your role first.', 'error');
+        return;
+      }
+      try {
+        const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, role })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.error || 'Failed');
+        
+        // Ask for OTP and new password
+        const otp = prompt('Enter the 4-digit code sent to your email:');
+        if (!otp) return;
+        const newPassword = prompt('Enter your new password (min 6 characters):');
+        if (!newPassword || newPassword.length < 6) {
+          showMessage('authMessage', 'Password must be at least 6 characters.', 'error');
+          return;
+        }
+
+        const resetResponse = await fetch(`${API_BASE}/auth/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, role, otp, new_password: newPassword })
+        });
+        const resetResult = await resetResponse.json();
+        if (!resetResponse.ok) throw new Error(resetResult.message || resetResult.error || 'Reset failed');
+        
+        showMessage('authMessage', 'Password reset successfully! You can now log in.', 'success');
+      } catch (error) {
+        showMessage('authMessage', error.message, 'error');
+      }
     });
   }
 }
@@ -623,12 +659,14 @@ function setupDashboardPage() {
     });
   }
 
-  // Navigation between sections
+  // Navigation between sections (only for internal links with data-section)
   navLinks.forEach(link => {
+    const section = link.getAttribute('data-section');
+    if (!section) return; // External links (campaigns.html, etc.) navigate normally
+
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      const section = link.getAttribute('data-section');
-      
+
       // Remove active class from all links
       navLinks.forEach(l => l.classList.remove('active'));
       link.classList.add('active');
@@ -649,7 +687,132 @@ function setupDashboardPage() {
   // Edit Profile Button
   if (editProfileBtn) {
     editProfileBtn.addEventListener('click', () => {
-      alert('Edit profile feature coming soon!');
+      const user = getUserSession();
+      if (!user) return;
+
+      // Populate form with current data
+      if (user.role === 'creator') {
+        document.getElementById('creatorEditFields').style.display = 'block';
+        document.getElementById('brandEditFields').style.display = 'none';
+        document.getElementById('editUsername').value = user.username || '';
+        document.getElementById('editPlatform').value = user.platform || 'Instagram';
+        document.getElementById('editCategory').value = user.category || 'Fashion';
+        document.getElementById('editRate').value = user.rate || '';
+        document.getElementById('editLocation').value = user.location || '';
+        document.getElementById('editBio').value = user.bio || '';
+        document.getElementById('editFollowers').value = user.followers_count || '';
+        document.getElementById('editEngagement').value = user.engagement_rate || '';
+      } else {
+        document.getElementById('creatorEditFields').style.display = 'none';
+        document.getElementById('brandEditFields').style.display = 'block';
+        document.getElementById('editCompanyName').value = user.company_name || '';
+        document.getElementById('editIndustry').value = user.industry || 'Technology';
+        document.getElementById('editBrandLocation').value = user.location || '';
+        document.getElementById('editWebsite').value = user.website || '';
+      }
+
+      document.getElementById('profileView').style.display = 'none';
+      document.getElementById('editProfileView').style.display = 'block';
+    });
+  }
+
+  // Cancel Edit
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener('click', () => {
+      document.getElementById('editProfileView').style.display = 'none';
+      document.getElementById('profileView').style.display = 'block';
+    });
+  }
+
+  // Edit Profile Form submit
+  const editProfileForm = document.getElementById('editProfileForm');
+  if (editProfileForm) {
+    editProfileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = getUserSession();
+      if (!user) return;
+
+      let updateData = {};
+      if (user.role === 'creator') {
+        updateData = {
+          username: document.getElementById('editUsername').value.trim(),
+          platform: document.getElementById('editPlatform').value,
+          category: document.getElementById('editCategory').value,
+          rate: parseFloat(document.getElementById('editRate').value) || 0,
+          location: document.getElementById('editLocation').value.trim(),
+          bio: document.getElementById('editBio').value.trim(),
+          followers_count: parseInt(document.getElementById('editFollowers').value) || 0,
+          engagement_rate: parseFloat(document.getElementById('editEngagement').value) || 0,
+        };
+      } else {
+        updateData = {
+          company_name: document.getElementById('editCompanyName').value.trim(),
+          industry: document.getElementById('editIndustry').value,
+          location: document.getElementById('editBrandLocation').value.trim(),
+          website: document.getElementById('editWebsite').value.trim(),
+        };
+      }
+
+      try {
+        const response = await authenticatedFetch(`${API_BASE}/auth/update-profile`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.error || 'Failed to update profile');
+
+        // Refresh profile data
+        const token = getAuthToken();
+        saveUserSession({ ...user, ...updateData }, token);
+        loadUserProfile({ ...user, ...updateData });
+
+        document.getElementById('editProfileView').style.display = 'none';
+        document.getElementById('profileView').style.display = 'block';
+        alert('Profile updated successfully!');
+      } catch (error) {
+        const msgEl = document.getElementById('editProfileMessage');
+        if (msgEl) {
+          msgEl.textContent = error.message;
+          msgEl.classList.add('show', 'error');
+        }
+      }
+    });
+  }
+
+  // Change Password Form
+  const changePasswordForm = document.getElementById('changePasswordForm');
+  if (changePasswordForm) {
+    changePasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentPw = document.getElementById('currentPassword').value;
+      const newPw = document.getElementById('newPassword').value;
+      const confirmPw = document.getElementById('confirmNewPassword').value;
+      const msgEl = document.getElementById('changePasswordMessage');
+
+      if (newPw.length < 6) {
+        if (msgEl) { msgEl.textContent = 'New password must be at least 6 characters'; msgEl.className = 'auth-message show error'; }
+        return;
+      }
+      if (newPw !== confirmPw) {
+        if (msgEl) { msgEl.textContent = 'Passwords do not match'; msgEl.className = 'auth-message show error'; }
+        return;
+      }
+
+      try {
+        const response = await authenticatedFetch(`${API_BASE}/auth/change-password`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_password: currentPw, new_password: newPw }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.error || 'Failed to change password');
+        if (msgEl) { msgEl.textContent = 'Password changed successfully!'; msgEl.className = 'auth-message show success'; }
+        changePasswordForm.reset();
+      } catch (error) {
+        if (msgEl) { msgEl.textContent = error.message; msgEl.className = 'auth-message show error'; }
+      }
     });
   }
 

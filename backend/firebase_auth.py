@@ -26,7 +26,7 @@ try:
             else:
                 print("  WARNING: firebase-credentials.json not found!")
                 print("   Download from: https://console.firebase.google.com/project/collabstr-5181a/settings/serviceaccounts/adminsdk")
-                print("   Place at: d:\\collabstr\\backend\\firebase-credentials.json")
+                print("   Place at: d:\\BrandNest\\backend\\firebase-credentials.json")
                 raise FileNotFoundError("Firebase credentials not found")
 except Exception as e:
     print(f" Firebase Admin SDK initialization failed: {e}")

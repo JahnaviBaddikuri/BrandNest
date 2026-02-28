@@ -1,4 +1,7 @@
-const API_BASE = "http://localhost:5000/api";
+// API_BASE is provided by auth.js; fallback only when loaded standalone
+if (typeof API_BASE === 'undefined') {
+  window.API_BASE = "http://localhost:5000/api";
+}
 const apiStatusEl = document.getElementById("apiStatus");
 
 const featuredFallback = [
@@ -57,6 +60,20 @@ function buildCreatorCard(item) {
   const imageStyle = item.image ? `style="background-image:url('${item.image}')"` : "";
   const verifiedBadge = item.verified ? `<div class="creator-card__verified">Verified</div>` : '';
   
+  // Check if user is logged in as brand (getSession might not be defined on landing page)
+  let session = null;
+  let isBrand = false;
+  try {
+    if (typeof getSession === 'function') {
+      session = getSession();
+      isBrand = session && session.role === 'brand';
+    }
+  } catch (e) {
+    // getSession not available, user not logged in
+  }
+  
+  const contactButton = isBrand ? `<button class="creator-card__contact-btn" data-creator-id="${item.id}">Contact</button>` : '';
+  
   card.innerHTML = `
     <div class="creator-card__img" ${imageStyle}></div>
     <div class="creator-card__body">
@@ -65,8 +82,18 @@ function buildCreatorCard(item) {
       ${verifiedBadge}
       <div class="creator-card__meta">${item.price} • ${item.location}</div>
       <div class="creator-card__meta">Rating ${item.rating}</div>
+      ${contactButton}
     </div>
   `;
+  
+  // Add event listener to contact button if it exists
+  if (isBrand && typeof handleContactRequest === 'function') {
+    const contactBtn = card.querySelector('.creator-card__contact-btn');
+    if (contactBtn) {
+      contactBtn.addEventListener('click', () => handleContactRequest(item.id, item.name));
+    }
+  }
+  
   return card;
 }
 
@@ -107,6 +134,7 @@ function fillBrandsGrid(grid, items) {
 
 function toCardData(creator) {
   return {
+    id: creator.id,
     name: creator.username || "Creator",
     platform: creator.platform || "UGC",
     followers: formatFollowers(creator.followers_count),
@@ -227,3 +255,44 @@ searchBtn.addEventListener("click", async () => {
 
 loadCreators();
 loadBrands();
+
+// Handle contact request
+async function handleContactRequest(creatorId, creatorName) {
+  // Prompt for optional message
+  const message = prompt(`Send a contact request to ${creatorName}. Add a message (optional):`);
+  
+  // User cancelled
+  if (message === null) {
+    return;
+  }
+  
+  try {
+    const response = await authenticatedFetch(`${API_BASE}/contact-requests`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        creator_id: creatorId,
+        message: message.trim()
+      })
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      if (response.status === 409) {
+        alert('You already sent a request to this creator. Check your Requests page to see the status.');
+      } else {
+        throw new Error(error.error || 'Failed to send contact request');
+      }
+      return;
+    }
+    
+    const data = await response.json();
+    alert(`Contact request sent to ${creatorName}! They will be notified.`);
+    
+  } catch (error) {
+    console.error('Error sending contact request:', error);
+    alert('Error: ' + error.message);
+  }
+}

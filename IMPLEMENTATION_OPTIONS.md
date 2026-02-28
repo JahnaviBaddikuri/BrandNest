@@ -1,4 +1,4 @@
-# Implementation Options for Collabstr Platform
+# Implementation Options for BrandNest Platform
 
 ## Authentication & Authorization Approaches
 

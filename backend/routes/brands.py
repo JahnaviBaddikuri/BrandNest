@@ -1,9 +1,10 @@
 # brands routes
 
 from flask import Blueprint, request, jsonify, current_app
-from models import db, Brand
+from models import db, Brand, ContactRequest, Campaign, Application, Order, Message, Notification, Review
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from jwt_auth import require_auth
 import os
 import uuid
 
@@ -134,18 +135,54 @@ def update_brand(brand_id):
 
 
 @brands_bp.route('/<int:brand_id>', methods=['DELETE'])
-def delete_brand(brand_id):
-    # delete brand
+@require_auth
+def delete_brand(brand_id, **kwargs):
+    current_user = kwargs.get('current_user', {})
+    if current_user.get('role') != 'brand' or current_user.get('user_id') != brand_id:
+        return jsonify({'status': 'error', 'message': 'unauthorized'}), 403
+
     try:
         brand = Brand.query.get(brand_id)
         if not brand:
             return jsonify({'status': 'error', 'message': 'not found'}), 404
 
+        # Get all campaign IDs owned by this brand
+        campaign_ids = [c.id for c in Campaign.query.filter_by(brand_id=brand_id).all()]
+
+        # Delete reviews linked to orders placed by this brand
+        brand_orders = Order.query.filter_by(brand_id=brand_id).all()
+        brand_order_ids = [o.id for o in brand_orders]
+        if brand_order_ids:
+            Review.query.filter(Review.order_id.in_(brand_order_ids)).delete(synchronize_session=False)
+
+        # Delete orders placed by this brand
+        Order.query.filter_by(brand_id=brand_id).delete(synchronize_session=False)
+
+        # Delete applications for campaigns owned by this brand
+        if campaign_ids:
+            Application.query.filter(Application.campaign_id.in_(campaign_ids)).delete(synchronize_session=False)
+
+        # Delete campaigns owned by this brand
+        Campaign.query.filter_by(brand_id=brand_id).delete(synchronize_session=False)
+
+        # Delete contact requests involving this brand
+        ContactRequest.query.filter_by(brand_id=brand_id).delete(synchronize_session=False)
+
+        # Delete messages sent or received by this brand
+        Message.query.filter(
+            ((Message.sender_role == 'brand') & (Message.sender_id == brand_id)) |
+            ((Message.receiver_role == 'brand') & (Message.receiver_id == brand_id))
+        ).delete(synchronize_session=False)
+
+        # Delete notifications for this brand
+        Notification.query.filter_by(user_role='brand', user_id=brand_id).delete(synchronize_session=False)
+
+        # Finally delete the brand
         db.session.delete(brand)
         db.session.commit()
 
-        return jsonify({'status': 'success', 'message': 'deleted'}), 200
+        return jsonify({'status': 'success', 'message': 'Account deleted successfully'}), 200
 
     except Exception as error:
         db.session.rollback()
-        return jsonify({'status': 'error', 'message': 'error'}), 500
+        return jsonify({'status': 'error', 'message': str(error)}), 500

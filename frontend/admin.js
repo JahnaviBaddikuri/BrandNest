@@ -1,4 +1,11 @@
 const API_BASE = "http://localhost:5000/api";
+const ADMIN_KEY = localStorage.getItem('admin_key') || prompt('Enter admin API key:') || '';
+if (ADMIN_KEY) localStorage.setItem('admin_key', ADMIN_KEY);
+
+function adminFetch(url, options = {}) {
+  options.headers = { ...options.headers, 'X-Admin-Key': ADMIN_KEY };
+  return fetch(url, options);
+}
 
 // DOM Elements
 const creatorsList = document.getElementById("creatorsList");
@@ -224,7 +231,7 @@ async function loadPendingUsers() {
 
   try {
     // Fetch pending users from backend
-    const response = await fetch(`${API_BASE}/admin/pending-users`);
+    const response = await adminFetch(`${API_BASE}/admin/pending-users`);
     const result = await response.json();
     
     if (!response.ok) {
@@ -288,7 +295,7 @@ async function approveUser(userType, userId) {
 
   try {
     // Call backend API to approve user
-    const response = await fetch(`${API_BASE}/admin/approve/${userType}/${userId}`, {
+    const response = await adminFetch(`${API_BASE}/admin/approve/${userType}/${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });

@@ -99,7 +99,8 @@ def require_auth(f):
                 'message': 'Invalid or expired token'
             }), 401
         
-        # Add user info to kwargs
+        # Add user info to request object AND kwargs for flexibility
+        request.token_data = decoded_token
         kwargs['current_user'] = decoded_token
         
         return f(*args, **kwargs)

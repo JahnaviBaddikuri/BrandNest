@@ -591,3 +591,198 @@ def resend_otp():
             'status': 'error',
             'message': f'Failed to resend OTP: {str(e)}'
         }), 500
+
+
+@auth_bp.route('/update-profile', methods=['PUT'])
+@require_auth
+def update_profile(current_user):
+    """Update user profile fields"""
+    try:
+        user_id = current_user['user_id']
+        role = current_user['role']
+        data = request.get_json()
+
+        if role == 'creator':
+            user = Creator.query.get(user_id)
+            if not user:
+                return jsonify({'status': 'error', 'message': 'User not found'}), 404
+            
+            updatable = ['username', 'platform', 'category', 'rate', 'followers_count',
+                         'engagement_rate', 'location', 'bio', 'profile_image_url']
+            
+            # Check username uniqueness if changing
+            if 'username' in data and data['username'] != user.username:
+                existing = Creator.query.filter_by(username=data['username']).first()
+                if existing:
+                    return jsonify({'status': 'error', 'message': 'Username already taken'}), 409
+
+        elif role == 'brand':
+            user = Brand.query.get(user_id)
+            if not user:
+                return jsonify({'status': 'error', 'message': 'User not found'}), 404
+            
+            updatable = ['company_name', 'industry', 'location', 'website', 'logo_url']
+            
+            # Check company name uniqueness if changing
+            if 'company_name' in data and data['company_name'] != user.company_name:
+                existing = Brand.query.filter_by(company_name=data['company_name']).first()
+                if existing:
+                    return jsonify({'status': 'error', 'message': 'Company name already taken'}), 409
+        else:
+            return jsonify({'status': 'error', 'message': 'Invalid role'}), 400
+
+        for field in updatable:
+            if field in data:
+                value = data[field]
+                if field == 'rate':
+                    value = float(value)
+                elif field in ['followers_count']:
+                    value = int(value)
+                elif field == 'engagement_rate':
+                    value = float(value)
+                setattr(user, field, value)
+
+        from datetime import datetime as dt
+        user.updated_at = dt.utcnow()
+        db.session.commit()
+
+        profile = user.to_dict()
+        profile['role'] = role
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Profile updated',
+            'data': profile
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': f'Update failed: {str(e)}'}), 500
+
+
+@auth_bp.route('/change-password', methods=['PUT'])
+@require_auth
+def change_password(current_user):
+    """Change password for authenticated user"""
+    try:
+        user_id = current_user['user_id']
+        role = current_user['role']
+        data = request.get_json()
+
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+
+        if not current_password or not new_password:
+            return jsonify({'status': 'error', 'message': 'Current and new password are required'}), 400
+
+        # Validate new password
+        is_valid, error_msg = validate_password_strength(new_password)
+        if not is_valid:
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        if role == 'creator':
+            user = Creator.query.get(user_id)
+        else:
+            user = Brand.query.get(user_id)
+
+        if not user:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+
+        if not user.check_password(current_password):
+            return jsonify({'status': 'error', 'message': 'Current password is incorrect'}), 401
+
+        user.set_password(new_password)
+        db.session.commit()
+
+        return jsonify({'status': 'success', 'message': 'Password changed successfully'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': f'Password change failed: {str(e)}'}), 500
+
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    """Send password reset OTP"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        role = data.get('role')
+
+        if not email or not role:
+            return jsonify({'status': 'error', 'message': 'Email and role are required'}), 400
+
+        if role not in ['creator', 'brand']:
+            return jsonify({'status': 'error', 'message': 'Invalid role'}), 400
+
+        if role == 'creator':
+            user = Creator.query.filter_by(email=email).first()
+            user_name = user.username if user else None
+        else:
+            user = Brand.query.filter_by(email=email).first()
+            user_name = user.company_name if user else None
+
+        if not user:
+            # Don't reveal if email exists - return success anyway
+            return jsonify({'status': 'success', 'message': 'If an account exists, a reset code has been sent'}), 200
+
+        otp_code = generate_otp(length=4)
+        user.otp_code = otp_code
+        user.otp_expiry = generate_otp_expiry(minutes=5)
+        db.session.commit()
+
+        send_otp_email(
+            recipient_email=user.email,
+            otp_code=otp_code,
+            user_name=user_name
+        )
+
+        return jsonify({
+            'status': 'success',
+            'message': 'If an account exists, a reset code has been sent'
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    """Reset password using OTP"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        role = data.get('role')
+        otp = data.get('otp')
+        new_password = data.get('new_password')
+
+        if not all([email, role, otp, new_password]):
+            return jsonify({'status': 'error', 'message': 'All fields are required'}), 400
+
+        is_valid, error_msg = validate_password_strength(new_password)
+        if not is_valid:
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        if role == 'creator':
+            user = Creator.query.filter_by(email=email).first()
+        else:
+            user = Brand.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+
+        is_otp_ok, otp_error = is_otp_valid(user.otp_code, user.otp_expiry, otp)
+        if not is_otp_ok:
+            return jsonify({'status': 'error', 'message': otp_error}), 400
+
+        user.set_password(new_password)
+        user.otp_code = None
+        user.otp_expiry = None
+        db.session.commit()
+
+        return jsonify({'status': 'success', 'message': 'Password reset successfully. You can now log in.'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500

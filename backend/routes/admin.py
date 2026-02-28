@@ -3,14 +3,27 @@ Admin Routes
 Handles admin operations: viewing pending users and approving accounts
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
+from functools import wraps
 from models import db, Creator, Brand
 from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
 
+def require_admin_key(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        api_key = request.headers.get('X-Admin-Key', '')
+        expected = current_app.config.get('ADMIN_API_KEY', '')
+        if not api_key or api_key != expected:
+            return jsonify({'status': 'error', 'message': 'unauthorized'}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+
 @admin_bp.route('/pending-users', methods=['GET'])
+@require_admin_key
 def get_pending_users():
     """
     Get all pending users (creators and brands) awaiting verification
@@ -43,6 +56,7 @@ def get_pending_users():
 
 
 @admin_bp.route('/approve/creator/<int:creator_id>', methods=['POST'])
+@require_admin_key
 def approve_creator(creator_id):
     """
     Approve a creator account by setting is_verified to True
@@ -82,6 +96,7 @@ def approve_creator(creator_id):
 
 
 @admin_bp.route('/approve/brand/<int:brand_id>', methods=['POST'])
+@require_admin_key
 def approve_brand(brand_id):
     """
     Approve a brand account by setting verified to True
@@ -121,6 +136,7 @@ def approve_brand(brand_id):
 
 
 @admin_bp.route('/stats', methods=['GET'])
+@require_admin_key
 def get_admin_stats():
     """
     Get admin statistics: total users, pending approvals, verified users

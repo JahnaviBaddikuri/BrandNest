@@ -7,7 +7,7 @@ load_dotenv()
 
 class Config:
     # base settings
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///collabstr.db')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///brandnest.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     DEBUG = False
@@ -17,6 +17,9 @@ class Config:
     # JWT Configuration
     JWT_EXPIRATION_HOURS = int(os.getenv('JWT_EXPIRATION_HOURS', 168))  # 7 days default
     JWT_ALGORITHM = 'HS256'
+    
+    # Admin Configuration
+    ADMIN_API_KEY = os.getenv('ADMIN_API_KEY', 'admin-secret-change-in-production')
     
     # Email Configuration
     MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp-mail.outlook.com')

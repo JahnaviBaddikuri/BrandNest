@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Collabstr</title>
+  <title>Dashboard - BrandNest</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,13 +13,8 @@
 <body>
   <header class="site-header">
     <div class="nav">
-      <div class="nav__logo"><a href="index.html">collabstr</a></div>
-      <nav class="nav__links">
-        <a href="index.html#marketplace">Search</a>
-        <a href="index.html#how">How It Works</a>
-        <a href="index.html#pricing">Pricing</a>
-        <a href="index.html#case-studies">Case Studies</a>
-      </nav>
+      <div class="nav__logo"><a href="index.html"><img src="nature_14835036.png" alt="BrandNest Logo">BrandNest</a></div>
+      <nav class="nav__links"></nav>
       <div class="nav__actions">
         <button class="btn btn--ghost" id="logoutBtn">Logout</button>
       </div>
@@ -30,11 +25,22 @@
     <aside class="dashboard-sidebar">
       <nav class="dashboard-nav">
         <a href="#profile" class="dashboard-nav__link active" data-section="profile">
-          <!--<span class="icon">👤</span>-->
           <span>Profile</span>
         </a>
+        <a href="requests.html" class="dashboard-nav__link">
+          <span>Contact Requests</span>
+        </a>
+        <a href="campaigns.html" class="dashboard-nav__link">
+          <span>Campaigns</span>
+        </a>
+        <a href="messages.html" class="dashboard-nav__link">
+          <span>Messages</span>
+          <span class="badge" id="unreadMsgBadge" style="display:none"></span>
+        </a>
+        <a href="orders.html" class="dashboard-nav__link">
+          <span>Orders</span>
+        </a>
         <a href="#settings" class="dashboard-nav__link" data-section="settings">
-          <!--<span class="icon">⚙️</span>-->
           <span>Settings</span>
         </a>
       </nav>
@@ -48,36 +54,132 @@
           <p>Manage your account information</p>
         </div>
 
-        <div class="profile-card">
-          <div class="profile-header">
-            <div class="profile-avatar" id="profileAvatar"></div>
-            <div class="profile-info">
-              <h2 id="profileName">Loading...</h2>
-              <p id="profileRole" class="role-badge">Creator</p>
-              <p id="profileEmail">user@example.com</p>
+        <!-- Profile View -->
+        <div id="profileView">
+          <div class="profile-card">
+            <div class="profile-header">
+              <div class="profile-avatar" id="profileAvatar"></div>
+              <div class="profile-info">
+                <h2 id="profileName">Loading...</h2>
+                <p id="profileRole" class="role-badge">Creator</p>
+                <p id="profileEmail">user@example.com</p>
+              </div>
+            </div>
+
+            <div class="profile-details">
+              <div class="detail-row">
+                <span class="detail-label">Account Type:</span>
+                <span class="detail-value" id="accountType">Creator</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value" id="accountEmail">user@example.com</span>
+              </div>
+              <div class="detail-row" id="verificationRow">
+                <span class="detail-label">Verification Status:</span>
+                <span class="detail-value" id="verificationStatus">Pending Approval</span>
+              </div>
+              <div class="detail-row" id="additionalDetails"></div>
             </div>
           </div>
 
-          <div class="profile-details">
-            <div class="detail-row">
-              <span class="detail-label">Account Type:</span>
-              <span class="detail-value" id="accountType">Creator</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Email:</span>
-              <span class="detail-value" id="accountEmail">user@example.com</span>
-            </div>
-            <div class="detail-row" id="verificationRow">
-              <span class="detail-label">Verification Status:</span>
-              <span class="detail-value" id="verificationStatus">Pending Approval</span>
-            </div>
-            <div class="detail-row" id="additionalDetails"></div>
+          <div class="action-buttons">
+            <button class="btn" id="editProfileBtn">Edit Profile</button>
+            <button class="btn btn--ghost" id="deleteAccountBtn">Delete Account</button>
           </div>
         </div>
 
-        <div class="action-buttons">
-          <button class="btn" id="editProfileBtn">Edit Profile</button>
-          <button class="btn btn--ghost" id="deleteAccountBtn">Delete Account</button>
+        <!-- Edit Profile Form (hidden by default) -->
+        <div id="editProfileView" style="display:none;">
+          <div class="profile-card">
+            <h3 style="margin:0 0 20px">Edit Your Profile</h3>
+            <div id="editProfileMessage" class="auth-message"></div>
+            <form id="editProfileForm">
+              <!-- Creator Fields -->
+              <div id="creatorEditFields" style="display:none;">
+                <div class="form-group">
+                  <label>Username</label>
+                  <input type="text" name="username" id="editUsername" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <label>Platform</label>
+                  <select name="platform" id="editPlatform" class="form-input">
+                    <option value="Instagram">Instagram</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="YouTube">YouTube</option>
+                    <option value="UGC">UGC</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Category</label>
+                  <select name="category" id="editCategory" class="form-input">
+                    <option value="Fashion">Fashion</option>
+                    <option value="Beauty">Beauty</option>
+                    <option value="Fitness">Fitness</option>
+                    <option value="Tech">Tech</option>
+                    <option value="Food">Food</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Lifestyle">Lifestyle</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Rate ($)</label>
+                  <input type="number" name="rate" id="editRate" class="form-input" min="0" step="0.01" />
+                </div>
+                <div class="form-group">
+                  <label>Location</label>
+                  <input type="text" name="location" id="editLocation" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <label>Bio</label>
+                  <textarea name="bio" id="editBio" class="form-input" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Followers Count</label>
+                  <input type="number" name="followers_count" id="editFollowers" class="form-input" min="0" />
+                </div>
+                <div class="form-group">
+                  <label>Engagement Rate (%)</label>
+                  <input type="number" name="engagement_rate" id="editEngagement" class="form-input" min="0" step="0.1" />
+                </div>
+              </div>
+
+              <!-- Brand Fields -->
+              <div id="brandEditFields" style="display:none;">
+                <div class="form-group">
+                  <label>Company Name</label>
+                  <input type="text" name="company_name" id="editCompanyName" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <label>Industry</label>
+                  <select name="industry" id="editIndustry" class="form-input">
+                    <option value="Technology">Technology</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Beauty">Beauty</option>
+                    <option value="Food & Beverage">Food & Beverage</option>
+                    <option value="Health & Wellness">Health & Wellness</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Education">Education</option>
+                    <option value="Finance">Finance</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Location</label>
+                  <input type="text" name="location" id="editBrandLocation" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <label>Website</label>
+                  <input type="url" name="website" id="editWebsite" class="form-input" />
+                </div>
+              </div>
+
+              <div class="action-buttons" style="margin-top:20px;">
+                <button type="submit" class="btn">Save Changes</button>
+                <button type="button" class="btn btn--ghost" id="cancelEditBtn">Cancel</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -89,12 +191,18 @@
         </div>
 
         <div class="settings-card">
-          <div class="setting-item">
-            <div class="setting-header">
-              <h3>Password</h3>
-              <p>Change your account password</p>
+          <div class="setting-item" style="flex-direction:column; align-items:stretch;">
+            <div class="setting-header" style="margin-bottom:15px;">
+              <h3>Change Password</h3>
+              <p>Update your account password</p>
             </div>
-            <button class="btn btn--ghost" id="changePasswordBtn">Change Password</button>
+            <div id="changePasswordMessage" class="auth-message"></div>
+            <form id="changePasswordForm" style="display:flex; flex-direction:column; gap:12px;">
+              <input type="password" id="currentPassword" placeholder="Current Password" class="form-input" required />
+              <input type="password" id="newPassword" placeholder="New Password (min 6 chars)" class="form-input" required />
+              <input type="password" id="confirmNewPassword" placeholder="Confirm New Password" class="form-input" required />
+              <button type="submit" class="btn" style="align-self:flex-start;">Update Password</button>
+            </form>
           </div>
 
           <div class="setting-item">
@@ -124,9 +232,9 @@
   </main>
 
   <footer class="site-footer">
-    <div class="footer__brand">collabstr</div>
+    <div class="footer__brand">BrandNest</div>
     <div class="footer__links"></div>
-    <p class="footer__copy">&copy; 2024 Collabstr. All rights reserved.</p>
+    <p class="footer__copy">&copy; 2024 BrandNest. All rights reserved.</p>
   </footer>
 
   <script src="auth.js"></script>

@@ -27,13 +27,13 @@ def send_otp_email(recipient_email, otp_code, user_name=None):
         Tuple (success: bool, error_message: str or None)
     """
     try:
-        subject = "Verify Your Email - Collabstr"
+        subject = "Verify Your Email - BrandNest"
         
         # Simple text body
         greeting = f"Hello {user_name}," if user_name else "Hello,"
         body = f"""{greeting}
 
-Thank you for registering with Collabstr
+Thank you for registering with BrandNest
 
 Your email verification code is: {otp_code}
 
@@ -42,7 +42,7 @@ This code will expire in 5 minutes.
 If you didn't request this code, please ignore this email.
 
 Best regards,
-Collabstr Team
+BrandNest Team
 """
         
         msg = Message(
@@ -85,16 +85,16 @@ def send_welcome_email(recipient_email, user_name):
         Tuple (success: bool, error_message: str or None)
     """
     try:
-        subject = "Welcome to Collabstr!"
+        subject = "Welcome to BrandNest!"
         
         body = f"""Hello {user_name},
 
-Welcome to Collabstr! Your email has been successfully verified.
+Welcome to BrandNest! Your email has been successfully verified.
 
 You can now log in and start exploring our platform.
 
 Best regards,
-Collabstr Team
+BrandNest Team
 """
         
         msg = Message(

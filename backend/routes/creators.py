@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify, current_app
-from models import db, Creator
+from models import db, Creator, ContactRequest, Application, Order, Message, Notification, Review
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from jwt_auth import require_auth
 import os
 import uuid
 
@@ -140,18 +141,50 @@ def update_creator(creator_id):
 
 
 @creators_bp.route('/<int:creator_id>', methods=['DELETE'])
-def delete_creator(creator_id):
-    
+@require_auth
+def delete_creator(creator_id, **kwargs):
+    """
+    DELETE endpoint - authenticated users deleting their own account
+    """
+    current_user = kwargs.get('current_user', {})
+    if current_user.get('role') != 'creator' or current_user.get('user_id') != creator_id:
+        return jsonify({'status': 'error', 'message': 'unauthorized'}), 403
+
     try:
         creator = Creator.query.get(creator_id)
         if not creator:
             return jsonify({'status': 'error', 'message': 'not found'}), 404
 
+        # Delete reviews linked to orders received by this creator
+        creator_orders = Order.query.filter_by(creator_id=creator_id).all()
+        creator_order_ids = [o.id for o in creator_orders]
+        if creator_order_ids:
+            Review.query.filter(Review.order_id.in_(creator_order_ids)).delete(synchronize_session=False)
+
+        # Delete orders received by this creator
+        Order.query.filter_by(creator_id=creator_id).delete(synchronize_session=False)
+
+        # Delete applications submitted by this creator
+        Application.query.filter_by(creator_id=creator_id).delete(synchronize_session=False)
+
+        # Delete contact requests involving this creator
+        ContactRequest.query.filter_by(creator_id=creator_id).delete(synchronize_session=False)
+
+        # Delete messages sent or received by this creator
+        Message.query.filter(
+            ((Message.sender_role == 'creator') & (Message.sender_id == creator_id)) |
+            ((Message.receiver_role == 'creator') & (Message.receiver_id == creator_id))
+        ).delete(synchronize_session=False)
+
+        # Delete notifications for this creator
+        Notification.query.filter_by(user_role='creator', user_id=creator_id).delete(synchronize_session=False)
+
+        # Finally delete the creator
         db.session.delete(creator)
         db.session.commit()
 
-        return jsonify({'status': 'success', 'message': 'deleted'}), 200
+        return jsonify({'status': 'success', 'message': 'Account deleted successfully'}), 200
 
     except Exception as error:
         db.session.rollback()
-        return jsonify({'status': 'error', 'message': 'error'}), 500
+        return jsonify({'status': 'error', 'message': str(error)}), 500

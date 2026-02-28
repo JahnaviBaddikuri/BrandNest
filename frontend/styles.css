@@ -48,9 +48,36 @@ a {
 }
 
 .nav__logo {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav__logo img {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+}
+
+.nav__logo a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar .logo img {
+  height: 24px;
+  width: 24px;
+  object-fit: contain;
 }
 
 .nav__links {
@@ -73,6 +100,27 @@ a {
   padding: 0;
   font-weight: 600;
   cursor: pointer;
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgb(255 132 160) 0%, rgb(251 102 157) 20%, rgb(179 45 194) 95%, rgb(136, 95, 183) 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 12px rgba(179, 45, 194, 0.4);
 }
 
 .nav__actions .btn:hover {
@@ -138,7 +186,7 @@ a {
 
 .search {
   display: grid;
-  grid-template-columns: 1fr 1fr 140px;
+  grid-template-columns: 1fr 1fr auto;
   gap: 12px;
   background: var(--card);
   border: 1px solid var(--border);
@@ -147,6 +195,7 @@ a {
   margin: 24px 0 16px;
   box-shadow: var(--shadow);
   width: 100%;
+  align-items: center;
 }
 
 .search__item {
@@ -271,6 +320,30 @@ a {
 .creator-card__meta {
   font-size: 12px;
   color: var(--muted);
+}
+
+.creator-card__contact-btn {
+  margin-top: 8px;
+  padding: 10px 16px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.creator-card__contact-btn:hover {
+  background: #5f4fd1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
+}
+
+.creator-card__contact-btn:active {
+  transform: translateY(0);
 }
 
 /* Brand Cards */
@@ -581,7 +654,27 @@ a {
 }
 
 .btn--search {
-  padding: 14px 22px;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: end;
+}
+
+.btn--search:hover {
+  background: transparent;
+  transform: scale(1.1);
+}
+
+.btn--search img {
+  height: 36px;
+  width: 36px;
+  object-fit: contain;
 }
 
 .modal {

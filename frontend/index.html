@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Collabstr             </title>
+  <title>BrandNest</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,13 +12,8 @@
 <body>
   <header class="site-header">
     <div class="nav">
-      <div class="nav__logo">collabstr</div>
-      <nav class="nav__links">
-        <a href="#marketplace">Search</a>
-        <a href="#how">How It Works</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#case-studies">Case Studies</a>
-      </nav>
+      <div class="nav__logo"><img src="nature_14835036.png" alt="BrandNest Logo">BrandNest</div>
+      <nav class="nav__links"></nav>
       <div class="nav__actions">
         <a href="login.html" class="btn btn--ghost">Login</a>
         <a href="join-brand.html" class="btn">Join as Brand</a>
@@ -30,7 +25,7 @@
   <main>
     <section class="hero" id="marketplace">
       <div class="hero__content">
-        <h1>Influencer Marketing Made Easy</h1>
+        <h1>Create Together. Grow Together.</h1>
         <p>Find and hire top Instagram, TikTok, YouTube, and UGC influencers to create unique content for your brand.</p>
         <div class="search">
           <div class="search__item">
@@ -53,7 +48,7 @@
               <option>Tech</option>
             </select>
           </div>
-          <button class="btn btn--search" id="searchBtn">Search</button>
+          <button class="btn btn--search" id="searchBtn"><img src="image.png" alt="Search"></button>
         </div>
         
         
@@ -84,13 +79,35 @@
   </main>
 
   <footer class="site-footer">
-    <div class="footer__brand">collabstr</div>
+    <div class="footer__brand">BrandNest</div>
     <div class="footer__links">
       
     </div>
     <p class="footer__copy"></p>
   </footer>
 
+  <script src="auth.js"></script>
+  <script>
+    // Expose session helpers for app.js (must be before app.js loads)
+    function getSession() { return getUserSession(); }
+    function clearSession() { clearUserSession(); }
+  </script>
   <script src="app.js"></script>
+  <script>
+    // Update nav if user is logged in
+    (function() {
+      if (isUserLoggedIn()) {
+        const user = getUserSession();
+        const actionsDiv = document.querySelector('.nav__actions');
+        if (actionsDiv && user) {
+          const name = user.username || user.company_name || 'User';
+          const initial = name.charAt(0).toUpperCase();
+          actionsDiv.innerHTML = `
+            <a href="dashboard.html" class="user-avatar" title="${name}">${initial}</a>
+          `;
+        }
+      }
+    })();
+  </script>
 </body>
 </html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - BrandNest</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="nav">
+            <div class="nav__logo"><a href="index.html"><img src="nature_14835036.png" alt="BrandNest Logo">BrandNest</a></div>
+            <nav class="nav__links"></nav>
+            <div class="nav__actions">
+                <button class="btn btn--ghost" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <nav class="dashboard-nav">
+                <a href="dashboard.html" class="dashboard-nav__link"><span>Profile</span></a>
+                <a href="requests.html" class="dashboard-nav__link"><span>Contact Requests</span></a>
+                <a href="campaigns.html" class="dashboard-nav__link"><span>Campaigns</span></a>
+                <a href="messages.html" class="dashboard-nav__link"><span>Messages</span></a>
+                <a href="orders.html" class="dashboard-nav__link active"><span>Orders</span></a>
+                <a href="dashboard.html#settings" class="dashboard-nav__link"><span>Settings</span></a>
+            </nav>
+        </aside>
+
+        <section class="dashboard-content">
+            <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+                <div>
+                    <h1>Orders</h1>
+                    <p id="welcomeMessage">Welcome!</p>
+                </div>
+                <button class="btn" id="createOrderBtn" style="display:none;">+ New Order</button>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="tab-btn active" data-status="all">All</button>
+                <button class="tab-btn" data-status="pending">Pending</button>
+                <button class="tab-btn" data-status="in_progress">In Progress</button>
+                <button class="tab-btn" data-status="delivered">Delivered</button>
+                <button class="tab-btn" data-status="completed">Completed</button>
+            </div>
+
+            <!-- Create Order Modal -->
+            <div id="createOrderModal" class="modal-overlay" style="display:none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Create Order</h2>
+                        <button class="modal-close" id="closeOrderModal">&times;</button>
+                    </div>
+                    <form id="createOrderForm">
+                        <div class="form-group">
+                            <label>Creator ID *</label>
+                            <input type="number" id="orderCreatorId" class="form-input" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Title *</label>
+                            <input type="text" id="orderTitle" class="form-input" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="orderDescription" class="form-input" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Deliverables</label>
+                            <textarea id="orderDeliverables" class="form-input" rows="2" placeholder="e.g., 2 Instagram posts, 1 story"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Price ($) *</label>
+                                <input type="number" id="orderPrice" class="form-input" min="0" step="0.01" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Deadline</label>
+                                <input type="date" id="orderDeadline" class="form-input" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Campaign (optional)</label>
+                            <input type="number" id="orderCampaignId" class="form-input" placeholder="Campaign ID" />
+                        </div>
+                        <button type="submit" class="btn" style="width:100%;margin-top:10px;">Create Order</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Review Modal -->
+            <div id="reviewModal" class="modal-overlay" style="display:none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Leave a Review</h2>
+                        <button class="modal-close" id="closeReviewModal">&times;</button>
+                    </div>
+                    <form id="reviewForm">
+                        <input type="hidden" id="reviewOrderId" />
+                        <div class="form-group">
+                            <label>Rating</label>
+                            <div class="star-rating" id="starRating">
+                                <span class="star" data-rating="1">&#9733;</span>
+                                <span class="star" data-rating="2">&#9733;</span>
+                                <span class="star" data-rating="3">&#9733;</span>
+                                <span class="star" data-rating="4">&#9733;</span>
+                                <span class="star" data-rating="5">&#9733;</span>
+                            </div>
+                            <input type="hidden" id="reviewRating" value="5" />
+                        </div>
+                        <div class="form-group">
+                            <label>Comment</label>
+                            <textarea id="reviewComment" class="form-input" rows="3" placeholder="Share your experience..."></textarea>
+                        </div>
+                        <button type="submit" class="btn" style="width:100%;margin-top:10px;">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Orders List -->
+            <div id="ordersContainer" class="requests-container">
+                <div class="loading">Loading orders...</div>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <h3>No orders yet</h3>
+                <p id="emptyMessage">Start collaborating to create orders!</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer__brand">BrandNest</div>
+        <div class="footer__links"></div>
+        <p class="footer__copy">&copy; 2024 BrandNest. All rights reserved.</p>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        let currentUser = null;
+        let allOrders = [];
+        let currentFilter = 'all';
+        let selectedRating = 5;
+
+        init();
+
+        function init() {
+            if (!isUserLoggedIn()) { window.location.href = 'login.html'; return; }
+            currentUser = getUserSession();
+            const name = currentUser.role === 'brand' ? currentUser.company_name : currentUser.username;
+            document.getElementById('welcomeMessage').textContent = `Welcome, ${name}!`;
+
+            if (currentUser.role === 'brand') {
+                document.getElementById('createOrderBtn').style.display = 'inline-block';
+            }
+
+            loadOrders();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                clearUserSession(); window.location.href = 'index.html';
+            });
+
+            // Filter tabs
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentFilter = tab.dataset.status;
+                    if (currentFilter === 'all') {
+                        displayOrders(allOrders);
+                    } else {
+                        displayOrders(allOrders.filter(o => o.status === currentFilter));
+                    }
+                });
+            });
+
+            // Create order modal
+            document.getElementById('createOrderBtn')?.addEventListener('click', () => {
+                document.getElementById('createOrderModal').style.display = 'flex';
+            });
+            document.getElementById('closeOrderModal')?.addEventListener('click', () => {
+                document.getElementById('createOrderModal').style.display = 'none';
+            });
+            document.getElementById('closeReviewModal')?.addEventListener('click', () => {
+                document.getElementById('reviewModal').style.display = 'none';
+            });
+
+            // Create order form
+            document.getElementById('createOrderForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = {
+                    creator_id: parseInt(document.getElementById('orderCreatorId').value),
+                    title: document.getElementById('orderTitle').value.trim(),
+                    description: document.getElementById('orderDescription').value.trim(),
+                    deliverables: document.getElementById('orderDeliverables').value.trim(),
+                    price: parseFloat(document.getElementById('orderPrice').value),
+                    deadline: document.getElementById('orderDeadline').value || null,
+                    campaign_id: parseInt(document.getElementById('orderCampaignId').value) || null,
+                };
+
+                try {
+                    const response = await authenticatedFetch(`${API_BASE}/orders`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || result.message || 'Failed');
+                    alert('Order created!');
+                    document.getElementById('createOrderModal').style.display = 'none';
+                    document.getElementById('createOrderForm').reset();
+                    loadOrders();
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            });
+
+            // Star rating
+            document.querySelectorAll('#starRating .star').forEach(star => {
+                star.addEventListener('click', () => {
+                    selectedRating = parseInt(star.dataset.rating);
+                    document.getElementById('reviewRating').value = selectedRating;
+                    updateStars(selectedRating);
+                });
+                star.addEventListener('mouseenter', () => updateStars(parseInt(star.dataset.rating)));
+            });
+            document.getElementById('starRating')?.addEventListener('mouseleave', () => updateStars(selectedRating));
+
+            // Review form
+            document.getElementById('reviewForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const orderId = document.getElementById('reviewOrderId').value;
+                try {
+                    const response = await authenticatedFetch(`${API_BASE}/reviews`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            order_id: parseInt(orderId),
+                            rating: selectedRating,
+                            comment: document.getElementById('reviewComment').value.trim(),
+                        }),
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || result.message || 'Failed');
+                    alert('Review submitted!');
+                    document.getElementById('reviewModal').style.display = 'none';
+                    document.getElementById('reviewForm').reset();
+                    selectedRating = 5;
+                    updateStars(5);
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            });
+        }
+
+        function updateStars(rating) {
+            document.querySelectorAll('#starRating .star').forEach(star => {
+                star.classList.toggle('active', parseInt(star.dataset.rating) <= rating);
+            });
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await authenticatedFetch(`${API_BASE}/orders`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || data.message || 'Failed');
+                allOrders = data.data || data.orders || [];
+                displayOrders(allOrders);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('ordersContainer').innerHTML = '<p style="color:red;padding:20px;">Failed to load orders.</p>';
+            }
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersContainer');
+            const empty = document.getElementById('emptyState');
+
+            if (!orders || orders.length === 0) {
+                container.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+            container.style.display = 'block';
+            empty.style.display = 'none';
+
+            container.innerHTML = orders.map(order => {
+                const statusColors = {
+                    pending: 'status-pending', accepted: 'status-accepted',
+                    in_progress: 'status-pending', delivered: 'status-accepted',
+                    completed: 'status-accepted', revision: 'status-pending',
+                    cancelled: 'status-rejected',
+                };
+
+                const otherName = currentUser.role === 'brand'
+                    ? (order.creator ? order.creator.username : 'Creator')
+                    : (order.brand ? order.brand.company_name : 'Brand');
+
+                // Status action buttons
+                let actions = getStatusActions(order);
+
+                return `
+                    <div class="request-card">
+                        <div class="request-header">
+                            <div class="party-details">
+                                <h3>${order.title}</h3>
+                                <p class="party-meta">With: ${otherName} &bull; $${Number(order.price).toLocaleString()}</p>
+                            </div>
+                            <span class="status-badge ${statusColors[order.status] || 'status-pending'}">${order.status.replace('_', ' ')}</span>
+                        </div>
+                        ${order.description ? `<div class="request-message"><p>${order.description}</p></div>` : ''}
+                        ${order.deliverables ? `<div class="request-message"><strong>Deliverables:</strong> ${order.deliverables}</div>` : ''}
+                        <div class="request-footer">
+                            <span class="request-date">${order.deadline ? 'Deadline: ' + new Date(order.deadline).toLocaleDateString() : ''} ${formatDate(order.created_at)}</span>
+                            <div class="request-actions">${actions}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Bind action buttons
+            container.querySelectorAll('.status-btn').forEach(btn => {
+                btn.addEventListener('click', () => updateOrderStatus(btn.dataset.id, btn.dataset.status));
+            });
+            container.querySelectorAll('.review-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('reviewOrderId').value = btn.dataset.id;
+                    document.getElementById('reviewModal').style.display = 'flex';
+                    updateStars(5);
+                });
+            });
+        }
+
+        function getStatusActions(order) {
+            const isBrand = currentUser.role === 'brand';
+            let html = '';
+
+            if (isBrand) {
+                if (order.status === 'delivered') {
+                    html += `<button class="btn btn-accept status-btn" data-id="${order.id}" data-status="completed">Approve</button>`;
+                    html += `<button class="btn btn-reject status-btn" data-id="${order.id}" data-status="revision">Request Revision</button>`;
+                }
+                if (order.status === 'completed') {
+                    html += `<button class="btn review-btn" data-id="${order.id}">Leave Review</button>`;
+                }
+                if (['pending', 'in_progress'].includes(order.status)) {
+                    html += `<button class="btn btn-reject status-btn" data-id="${order.id}" data-status="cancelled">Cancel</button>`;
+                }
+            } else {
+                if (order.status === 'pending') {
+                    html += `<button class="btn btn-accept status-btn" data-id="${order.id}" data-status="accepted">Accept</button>`;
+                    html += `<button class="btn btn-reject status-btn" data-id="${order.id}" data-status="cancelled">Decline</button>`;
+                }
+                if (order.status === 'accepted') {
+                    html += `<button class="btn status-btn" data-id="${order.id}" data-status="in_progress">Start Work</button>`;
+                }
+                if (['in_progress', 'revision'].includes(order.status)) {
+                    html += `<button class="btn btn-accept status-btn" data-id="${order.id}" data-status="delivered">Mark Delivered</button>`;
+                }
+                if (order.status === 'completed') {
+                    html += `<button class="btn review-btn" data-id="${order.id}">Leave Review</button>`;
+                }
+            }
+            return html;
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const response = await authenticatedFetch(`${API_BASE}/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus }),
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || result.message || 'Failed');
+                alert(`Order status updated to: ${newStatus.replace('_', ' ')}`);
+                loadOrders();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const diffDays = Math.floor((Date.now() - date) / 86400000);
+            if (diffDays < 1) return 'Created today';
+            if (diffDays < 7) return `Created ${diffDays}d ago`;
+            return 'Created ' + date.toLocaleDateString();
+        }
+    </script>
+
+
+</body>
+</html>
