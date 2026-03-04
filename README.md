@@ -272,19 +272,19 @@ BrandNest/
 
 ## Screenshots
 
-<img width="1915" height="856" alt="Image 1" src="https://github.com/user-attachments/assets/ead9ed76-8b30-4361-a5a8-4fe7aed23b71" />
+<img width="1915" height="856" alt="Image 1" src="https://github.com/user-attachments/assets/ead9ed76-8b30-4361-a5a8-4fe7aed23b71" /> <br><br>
 
-<img width="1891" height="729" alt="Image 7" src="https://github.com/user-attachments/assets/13cb6340-39d0-410e-b11c-41c8892e0165" />
+<img width="1891" height="729" alt="Image 7" src="https://github.com/user-attachments/assets/13cb6340-39d0-410e-b11c-41c8892e0165" /><br><br>
 
-<img width="1857" height="855" alt="Image 2" src="https://github.com/user-attachments/assets/e199d907-be12-4e0e-9846-63e16734a305" />
+<img width="1857" height="855" alt="Image 2" src="https://github.com/user-attachments/assets/e199d907-be12-4e0e-9846-63e16734a305" /><br><br>
 
-<img width="1861" height="847" alt="Image 3" src="https://github.com/user-attachments/assets/6cbad50e-a17f-4c3a-a424-6bb147522c8c" />
+<img width="1861" height="847" alt="Image 3" src="https://github.com/user-attachments/assets/6cbad50e-a17f-4c3a-a424-6bb147522c8c" /><br><br>
 
-<img width="1851" height="841" alt="Image 4" src="https://github.com/user-attachments/assets/db793d12-2604-4076-adaa-6a2fac6e64bc" />
+<img width="1851" height="841" alt="Image 4" src="https://github.com/user-attachments/assets/db793d12-2604-4076-adaa-6a2fac6e64bc" /><br><br>
 
-<img width="1859" height="826" alt="Image 5" src="https://github.com/user-attachments/assets/b6db9390-0f5c-4b30-91e1-9dd07ecfa37d" />
+<img width="1859" height="826" alt="Image 5" src="https://github.com/user-attachments/assets/b6db9390-0f5c-4b30-91e1-9dd07ecfa37d" /><br><br>
 
-<img width="1862" height="843" alt="Image 6" src="https://github.com/user-attachments/assets/df6bdff6-f148-46b8-a253-ba445ab60dfe" />
+<img width="1862" height="843" alt="Image 6" src="https://github.com/user-attachments/assets/df6bdff6-f148-46b8-a253-ba445ab60dfe" /><br><br>
 
 
 ---
