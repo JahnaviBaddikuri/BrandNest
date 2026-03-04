@@ -272,7 +272,7 @@ BrandNest/
 
 ## Screenshots
 
-Image 1.png
+![Dashboard](Image 1.png)
 Image 7.png
 Image 2.png
 Image 3.png
