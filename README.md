@@ -272,13 +272,8 @@ BrandNest/
 
 ## Screenshots
 
-https://github.com/JahnaviBaddikuri/BrandNest/blob/83216a171615f0651f781613e8afd0baed1a10cf/Image%201.png
-Image 7.png
-Image 2.png
-Image 3.png
-Image 4.png
-Image 5.png
-Image 6.png
+<img width="1915" height="856" alt="Image 1" src="https://github.com/user-attachments/assets/ead9ed76-8b30-4361-a5a8-4fe7aed23b71" />
+
 
 ---
 
