@@ -272,7 +272,7 @@ BrandNest/
 
 ## Screenshots
 
-![Dashboard](Image 1.png)
+https://github.com/JahnaviBaddikuri/BrandNest/blob/83216a171615f0651f781613e8afd0baed1a10cf/Image%201.png
 Image 7.png
 Image 2.png
 Image 3.png
